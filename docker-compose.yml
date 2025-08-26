@@ -1,0 +1,67 @@
+services:
+  # ========== BASE DE DONNÉES MARIADB ==========
+  database:
+    image: mariadb:10.11
+    container_name: pokemon-planning-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: dev
+      MARIADB_USER: ia
+      MARIADB_PASSWORD: foufafou
+      MARIADB_AUTO_UPGRADE: 1
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - pokemon-network
+    command: >
+      --innodb-buffer-pool-size=256M
+      --innodb-log-file-size=64M
+      --innodb-flush-log-at-trx-commit=1
+      --innodb-file-per-table=1
+
+  # ========== BACKEND SPRING BOOT ==========
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pokemon-planning-backend
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://database:3306/dev?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=ia
+      - SPRING_DATASOURCE_PASSWORD=foufafou
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - pokemon-network
+
+  # ========== FRONTEND VUE ==========
+  frontend:
+    build:
+      context: ./src/main/frontend
+      dockerfile: Dockerfile
+    container_name: pokemon-planning-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - pokemon-network
+
+# ========== VOLUMES ==========
+volumes:
+  mariadb_data:
+    driver: local
+
+# ========== NETWORKS ==========
+networks:
+  pokemon-network:
+    driver: bridge
