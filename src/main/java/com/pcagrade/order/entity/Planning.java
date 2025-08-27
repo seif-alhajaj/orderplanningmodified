@@ -191,10 +191,10 @@ public class Planning extends AbstractUlidEntity {
      * Priority levels for planning entries
      */
     public enum PlanningPriority {
-        EXCELSIOR,    // Must be done immediately
-        FAST_PLUS,      // Important, should be done soon
-        FAST,    // Normal priority
-        CLASSIC        // Can be delayed if needed
+        EXCELSIORS,  // Previously URGENT
+        FAST_PLUS,   // Previously HIGH
+        FAST,        // Previously MEDIUM
+        CLASSIC      // Previously LOW (and default)
     }
 
     /**

@@ -417,7 +417,7 @@ button:disabled {
   color: #dc3545;
 }
 
-.item-priority.Excelsior {
+.item-priority.Excelsiors {
   color: #dc3545;
   font-weight: bold;
 }
@@ -434,6 +434,26 @@ button:disabled {
 
 .item-priority.Classic {
   color: #28a745;
+}
+
+.priority-item.Excelsiors {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.priority-item.Fast+ {
+  background: #ffeaa7;
+  color: #856404;
+}
+
+.priority-item.Fast {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.priority-item.Classic {
+  background: #d4edda;
+  color: #155724;
 }
 
 .priority-stats {

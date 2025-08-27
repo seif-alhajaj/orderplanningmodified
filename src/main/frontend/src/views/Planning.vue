@@ -119,7 +119,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Priority Mode</label>
           <select v-model="config.priorityMode" class="input-field">
-            <option value="excelsior">Excelsior First</option>
+            <option value="excelsiors">Excelsiors First</option>
             <option value="balanced">Balanced</option>
             <option value="efficiency">Efficiency First</option>
           </select>

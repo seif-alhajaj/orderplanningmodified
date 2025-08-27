@@ -214,14 +214,14 @@ public class PlanningService {
                 FROM `order` o 
                 WHERE o.date_creation >= :fromDate 
                   AND o.statut = 1 
-                ORDER BY 
-                    CASE o.priorite 
-                        WHEN 'EXCELSIOR' THEN 4
-                        WHEN 'FAST_PLUS' THEN 3  
-                        WHEN 'FAST' THEN 2
-                        WHEN 'CLASSIC' THEN 1
-                        ELSE 0
-                    END DESC,
+                ORDER BY
+                    CASE o.priorite
+                           WHEN 'EXCELSIORS' THEN 4
+                           WHEN 'FAST+' THEN 3 
+                           WHEN 'FAST' THEN 2
+                           WHEN 'CLASSIC' THEN 1
+                           ELSE 0
+                           END DESC,
                     o.date_creation ASC
             """;
 

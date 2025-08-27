@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS j_planning (
     start_time DATETIME NOT NULL,
     end_time DATETIME,
     estimated_duration_minutes INT NOT NULL DEFAULT 0,
-    priority ENUM('EXCELSIOR', 'FAST+', 'FAST', 'CLASSIC') DEFAULT 'CLASSIC',
+    priority ENUM('EXCELSIORS', 'FAST+', 'FAST', 'CLASSIC') DEFAULT 'CLASSIC',,
     status ENUM('SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED') DEFAULT 'SCHEDULED',
     completed BOOLEAN DEFAULT FALSE,
     card_count INT DEFAULT 1,
@@ -88,11 +88,11 @@ VALUES
 INSERT IGNORE INTO `order`
 (id, num_commande, nombre_cartes, cartes_avec_nom, pourcentage_avec_nom, prix_total, priorite, statut, date_creation, duree_estimee_minutes, delai_code)
 VALUES
-(UNHEX(REPLACE(UUID(), '-', '')), 'CMD001', 25, 20, 80.00, 150.00, 'EXCELSIOR', 1, NOW(), 75, 'EXCELSIOR'),
+(UNHEX(REPLACE(UUID(), '-', '')), 'CMD001', 25, 20, 80.00, 150.00, 'EXCELSIORS', 1, NOW(), 75, 'EXCELSIORS'),
 (UNHEX(REPLACE(UUID(), '-', '')), 'CMD002', 15, 12, 80.00, 90.00, 'FAST', 1, NOW(), 45, 'FAST'),
 (UNHEX(REPLACE(UUID(), '-', '')), 'CMD003', 30, 25, 83.33, 200.00, 'FAST+', 1, NOW(), 90, 'FAST+'),
 (UNHEX(REPLACE(UUID(), '-', '')), 'CMD004', 10, 8, 80.00, 60.00, 'CLASSIC', 1, NOW(), 30, 'CLASSIC'),
-(UNHEX(REPLACE(UUID(), '-', '')), 'CMD005', 50, 40, 80.00, 350.00, 'EXCELSIOR', 1, NOW(), 150, 'EXCELSIOR');
+(UNHEX(REPLACE(UUID(), '-', '')), 'CMD005', 50, 40, 80.00, 350.00, 'EXCELSIORS', 1, NOW(), 150, 'EXCELSIORS');
 
 -- Vérification
 SELECT 'Employés créés:' as info, COUNT(*) as count FROM j_employee;

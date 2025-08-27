@@ -274,13 +274,12 @@ public class OrderService {
                     (SELECT COUNT(*) FROM card_certification_order cco 
                      WHERE cco.order_id = o.id), 10
                 ) as cardCount,
-                CASE 
-                    WHEN o.delai = 'X' THEN 'URGENT'
-                    WHEN o.delai = 'F+' THEN 'HIGH'
-                    WHEN o.delai = 'F' THEN 'HIGH'
-                    WHEN o.delai = 'E' THEN 'MEDIUM'
-                    WHEN o.delai = 'C' THEN 'LOW'
-                    ELSE 'MEDIUM'
+                CASE
+                   WHEN o.delai = 'X' THEN 'Excelsiors'
+                   WHEN o.delai = 'F+' THEN 'Fast+'
+                   WHEN o.delai = 'F' THEN 'Fast'
+                   WHEN o.delai = 'C' THEN 'Classic'
+                   ELSE 'Classic'
                 END as priority,
                 o.status,
                 o.prix_total as totalPrice

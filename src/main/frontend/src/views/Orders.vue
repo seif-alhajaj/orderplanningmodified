@@ -156,7 +156,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
             <select v-model="filterPriority" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="all">All Priorities</option>
-              <option value="EXCELSIOR">Excelsior</option>
+              <option value="EXCELSIORS">Excelsiors</option>
               <option value="FAST+">Fast+</option>
               <option value="FAST">Fast</option>
               <option value="CLASSIC">Classic</option>
@@ -522,9 +522,10 @@ const mapOrderFromApi = (order) => {
 const mapPriority = (priority) => {
   if (!priority) return 'FAST'
   const p = String(priority).toUpperCase()
-  if (p.includes('EXCELSIOR')) return 'EXCELSIOR'
-  if (p.includes('FAST+') || p.includes('FAST')) return 'FAST+'
-  if (p.includes('CLASSIC') || p.includes('CLASSIC')) return 'CLASSIC'
+  if (p.includes('EXCELSIORS')) return 'EXCELSIORS'
+  if (p.includes('FAST+')) return 'FAST+'
+  if (p.includes('FAST')) return 'FAST'
+  if (p.includes('CLASSIC')) return 'CLASSIC'
   return 'FAST'
 }
 
@@ -576,7 +577,7 @@ const completeOrder = (id) => console.log('Complete order:', id)
 
 const getPriorityColor = (priority) => {
   switch (priority?.toUpperCase()) {
-    case 'EXCELSIOR': return 'bg-red-100 text-red-800'
+    case 'EXCELSIORS': return 'bg-red-100 text-red-800'
     case 'FAST+': return 'bg-orange-100 text-orange-800'
     case 'FAST': return 'bg-yellow-100 text-yellow-800'
     case 'CLASSIC': return 'bg-green-100 text-green-800'
@@ -586,9 +587,9 @@ const getPriorityColor = (priority) => {
 
 const getPriorityLabel = (priority) => {
   switch (priority?.toUpperCase()) {
-    case 'EXCELSIOR': return '🔴 Excelsior'
+    case 'EXCELSIORS': return '🔴 Excelsiors'
     case 'FAST+': return '🟠 Fast+'
-    case 'FAST': return '🟡 FAST'
+    case 'FAST': return '🟡 Fast'
     case 'CLASSIC': return '🟢 Classic'
     default: return '⚪ Unknown'
   }
