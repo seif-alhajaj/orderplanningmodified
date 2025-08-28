@@ -914,7 +914,7 @@ public class PlanningController {
                     insertQ.setParameter(6, endDateTime); // end_time
                     insertQ.setParameter(7, durationMinutes); // estimated_duration_minutes
                     insertQ.setParameter(8, endDateTime); // estimated_end_time
-                    insertQ.setParameter(9, "MEDIUM"); // priority (ENUM)
+                    insertQ.setParameter(9, "CLASSIC"); // priority (ENUM)
                     insertQ.setParameter(10, "SCHEDULED"); // status (ENUM) - correct value!
                     insertQ.setParameter(11, 0); // completed (BOOLEAN as INT)
                     insertQ.setParameter(12, cardCount); // card_count
@@ -1202,6 +1202,21 @@ public class PlanningController {
             return ResponseEntity.ok(result);
         }
     }
+    /**
+     * Map priority values to database ENUM values
+     * @param orderPriority Priority from Order or any source
+     * @return Database-compatible priority string
+     */
+    private String mapPriorityToDatabase(String orderPriority) {
+        if (orderPriority == null) return "CLASSIC";
 
+        return switch (orderPriority.toUpperCase()) {
+            case "EXCELSIOR" -> "EXCELSIOR";
+            case "FAST_PLUS", "FAST+" -> "FAST+";
+            case "FAST" -> "FAST";
+            case "CLASSIC", "MEDIUM", "LOW", "HIGH" -> "CLASSIC";
+            default -> "CLASSIC";
+        };
+    }
 
 }

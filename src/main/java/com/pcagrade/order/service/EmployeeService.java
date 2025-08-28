@@ -152,72 +152,100 @@ public class EmployeeService {
      * ✅ REMPLACEZ COMPLÈTEMENT la méthode getAllActiveEmployees dans EmployeeService.java
      * Le problème : row[5] est INTEGER mais le code essaie de le caster en Boolean
      */
+    /**
+     * ✅ VERSION CORRIGÉE - Get all active employees with proper error handling
+     */
     public List<Map<String, Object>> getAllActiveEmployees() {
         try {
             System.out.println("👥 Loading active employees from j_employee table...");
 
-            // ✅ REQUÊTE CORRIGÉE pour j_employee avec colonnes anglaises
+            // ✅ REQUÊTE SIMPLIFIÉE ET SÉCURISÉE
             String sql = """
-                SELECT 
-                    HEX(e.id) as id,
-                    e.first_name as firstName,
-                    e.last_name as lastName,
-                    e.email,
-                    COALESCE(e.work_hours_per_day, 8) as workHoursPerDay,
-                    COALESCE(e.active, 1) as active,
-                    e.creation_date as creationDate
-                FROM j_employee e
-                WHERE COALESCE(e.active, 1) = 1
-                ORDER BY e.last_name, e.first_name
-            """;
+            SELECT 
+                HEX(id) as id,
+                first_name,
+                last_name, 
+                email,
+                COALESCE(work_hours_per_day, 8) as work_hours,
+                COALESCE(active, 1) as active,
+                creation_date
+            FROM j_employee 
+            WHERE COALESCE(active, 1) = 1
+            ORDER BY last_name, first_name
+        """;
 
             Query query = entityManager.createNativeQuery(sql);
             @SuppressWarnings("unchecked")
             List<Object[]> results = query.getResultList();
 
             List<Map<String, Object>> employees = new ArrayList<>();
+            System.out.println("📊 Found " + results.size() + " raw employee records");
 
-            System.out.println("📊 Found " + results.size() + " active employees");
-
-            for (Object[] row : results) {
+            for (int i = 0; i < results.size(); i++) {
                 try {
+                    Object[] row = results.get(i);
+                    System.out.println("Processing employee " + i + ": " + Arrays.toString(row));
+
                     Map<String, Object> employee = new HashMap<>();
 
-                    // Mapping sécurisé avec null checks
-                    employee.put("id", (String) row[0]);
-                    employee.put("firstName", (String) row[1]);
-                    employee.put("lastName", (String) row[2]);
-                    employee.put("email", (String) row[3]);
-                    employee.put("workHoursPerDay", row[4] != null ?
-                            ((Number) row[4]).intValue() : 8);
+                    // ✅ MAPPING SÉCURISÉ avec vérification de null et type
+                    employee.put("id", row[0] != null ? row[0].toString() : "");
+                    employee.put("firstName", row[1] != null ? row[1].toString() : "");
+                    employee.put("lastName", row[2] != null ? row[2].toString() : "");
+                    employee.put("email", row[3] != null ? row[3].toString() : "");
 
-                    // ✅ Conversion correcte active (0/1 → boolean)
+                    // ✅ CONVERSION SÉCURISÉE des heures de travail
+                    int workHours = DEFAULT_WORK_HOURS_PER_DAY;
+                    if (row[4] != null) {
+                        try {
+                            if (row[4] instanceof Number) {
+                                workHours = ((Number) row[4]).intValue();
+                            } else {
+                                workHours = Integer.parseInt(row[4].toString());
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("⚠️  Invalid work hours for employee " + i + ": " + row[4] + ", using default");
+                            workHours = DEFAULT_WORK_HOURS_PER_DAY;
+                        }
+                    }
+                    employee.put("workHoursPerDay", workHours);
+
+                    // ✅ CONVERSION SÉCURISÉE du statut active
                     boolean isActive = true;
                     if (row[5] != null) {
-                        int activeValue = ((Number) row[5]).intValue();
-                        isActive = (activeValue == 1);
+                        try {
+                            if (row[5] instanceof Number) {
+                                isActive = ((Number) row[5]).intValue() == 1;
+                            } else if (row[5] instanceof Boolean) {
+                                isActive = (Boolean) row[5];
+                            } else {
+                                String activeStr = row[5].toString().toLowerCase();
+                                isActive = "1".equals(activeStr) || "true".equals(activeStr);
+                            }
+                        } catch (Exception e) {
+                            System.out.println("⚠️  Invalid active status for employee " + i + ": " + row[5] + ", assuming active");
+                            isActive = true;
+                        }
                     }
                     employee.put("active", isActive);
 
+                    // ✅ DATE DE CRÉATION
                     employee.put("creationDate", row[6]);
 
-                    // ✅ Champs calculés pour l'affichage frontend
-                    String firstName = (String) row[1];
-                    String lastName = (String) row[2];
+                    // ✅ CHAMPS CALCULÉS
+                    String firstName = employee.get("firstName").toString();
+                    String lastName = employee.get("lastName").toString();
                     employee.put("fullName", firstName + " " + lastName);
-                    employee.put("name", firstName + " " + lastName); // Alias pour compatibilité
-                    employee.put("nomComplet", firstName + " " + lastName); // Pour vue française
                     employee.put("available", true);
                     employee.put("currentLoad", 0);
 
                     employees.add(employee);
+                    System.out.println("  ✅ Employee " + i + " processed: " + firstName + " " + lastName);
 
-                    System.out.println("  ✅ Employee: " + firstName + " " + lastName +
-                            " (ID: " + row[0] + ", active: " + isActive + ")");
-
-                } catch (Exception rowError) {
-                    System.err.println("❌ Error processing employee row: " + rowError.getMessage());
-                    // Continue avec les autres employés
+                } catch (Exception e) {
+                    System.err.println("❌ Error processing employee " + i + ": " + e.getMessage());
+                    e.printStackTrace();
+                    // Continue avec l'employé suivant au lieu de faire échouer tout
                 }
             }
 
@@ -225,10 +253,11 @@ public class EmployeeService {
             return employees;
 
         } catch (Exception e) {
-            System.err.println("❌ MAJOR ERROR in getAllActiveEmployees: " + e.getMessage());
+            System.err.println("❌ Fatal error in getAllActiveEmployees: " + e.getMessage());
             e.printStackTrace();
 
-            // ✅ En cas d'erreur, retourner liste vide au lieu de crash
+            // ✅ RETOURNER UNE LISTE VIDE AU LIEU D'UNE EXCEPTION
+            // Cela permettra au frontend de fonctionner même en cas d'erreur
             return new ArrayList<>();
         }
     }

@@ -282,10 +282,31 @@ const refreshData = async () => {
 const loadEmployeeData = async () => {
   loading.value = true
   try {
-    const response = await fetch(`/api/frontend/employees/${props.employeeId}`) // ✅ Nouveau endpoint
+    console.log('🔍 Loading employee data for:', props.employeeId)
+
+    // Utiliser l'endpoint qui fonctionne et filtrer côté client
+    const response = await fetch('/api/employees') // ✅ ENDPOINT CORRECT
+
     if (response.ok) {
-      const data = await response.json()
-      employeeData.value = data.employee || data
+      const employees = await response.json()
+      const employee = employees.find(emp => emp.id === props.employeeId)
+
+      if (employee) {
+        employeeData.value = {
+          id: employee.id,
+          firstName: employee.firstName,
+          lastName: employee.lastName,
+          email: employee.email,
+          workHoursPerDay: employee.workHoursPerDay || 8,
+          active: employee.active,
+          status: employee.active ? 'AVAILABLE' : 'OFFLINE'
+        }
+        console.log('✅ Employee data loaded:', employeeData.value)
+      } else {
+        console.error('Employee not found with ID:', props.employeeId)
+      }
+    } else {
+      console.error('Failed to load employee data:', response.status)
     }
   } catch (error) {
     console.error('Error loading employee data:', error)

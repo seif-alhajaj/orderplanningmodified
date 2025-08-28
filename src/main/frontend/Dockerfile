@@ -1,8 +1,9 @@
 # ===============================================
-# DOCKERFILE FOR VUE.JS APP WITH NGINX
+# DOCKERFILE FOR VUE.JS APP WITH NGINX - FIXED
 # ===============================================
 
-FROM node:18-alpine AS builder
+# Use Node.js 20 or 22 as required by Vite 7.1.3
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 

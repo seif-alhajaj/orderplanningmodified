@@ -280,8 +280,10 @@ public class EmployeeController {
         }
     }
 
+    // ========== AJOUTER CET ENDPOINT DEBUG DANS EmployeeController.java ==========
+
     /**
-     * 🔍 DEBUG ENDPOINT - Check database and table status
+     * 🔍 DEBUG ENDPOINT - Diagnostic des employés
      * Endpoint: GET /api/employees/debug
      */
     @GetMapping("/debug")
@@ -289,52 +291,123 @@ public class EmployeeController {
         Map<String, Object> debug = new HashMap<>();
 
         try {
-            // 1. Check if j_employee table exists
-            String sqlCheckTable = "SHOW TABLES LIKE 'j_employee'";
-            Query queryCheckTable = entityManager.createNativeQuery(sqlCheckTable);
-            @SuppressWarnings("unchecked")
-            List<Object> tableExists = queryCheckTable.getResultList();
+            System.out.println("🔍 DEBUG: Employee endpoint diagnostic...");
 
-            debug.put("table_j_employee_exists", !tableExists.isEmpty());
+            // 1. Test de connectivité database
+            debug.put("timestamp", new Date());
+            debug.put("database_connected", false);
 
-            if (!tableExists.isEmpty()) {
-                // 2. Count total and active employees
-                String sqlCount = "SELECT COUNT(*) FROM j_employee";
-                Query queryCount = entityManager.createNativeQuery(sqlCount);
-                Number totalCount = (Number) queryCount.getSingleResult();
-                debug.put("j_employee_total_count", totalCount.intValue());
+            try {
+                Query testQuery = entityManager.createNativeQuery("SELECT 1");
+                testQuery.getSingleResult();
+                debug.put("database_connected", true);
+                System.out.println("✅ Database connection OK");
+            } catch (Exception e) {
+                debug.put("database_error", e.getMessage());
+                System.out.println("❌ Database connection failed: " + e.getMessage());
+            }
 
-                String sqlActiveCount = "SELECT COUNT(*) FROM j_employee WHERE active = 1";
-                Query queryActiveCount = entityManager.createNativeQuery(sqlActiveCount);
-                Number activeCount = (Number) queryActiveCount.getSingleResult();
-                debug.put("j_employee_active_count", activeCount.intValue());
-
-                // 3. Sample data
-                String sqlSample = "SELECT HEX(id), first_name, last_name, email, active FROM j_employee LIMIT 3";
-                Query querySample = entityManager.createNativeQuery(sqlSample);
+            // 2. Test structure de la table j_employee
+            try {
+                Query structureQuery = entityManager.createNativeQuery(
+                        "DESCRIBE j_employee"
+                );
                 @SuppressWarnings("unchecked")
-                List<Object[]> sampleData = querySample.getResultList();
+                List<Object[]> structure = structureQuery.getResultList();
 
-                List<Map<String, Object>> employees = new ArrayList<>();
-                for (Object[] row : sampleData) {
+                List<Map<String, Object>> columns = new ArrayList<>();
+                for (Object[] row : structure) {
+                    Map<String, Object> col = new HashMap<>();
+                    col.put("field", row[0]);
+                    col.put("type", row[1]);
+                    col.put("null", row[2]);
+                    col.put("key", row[3]);
+                    col.put("default", row[4]);
+                    columns.add(col);
+                }
+                debug.put("table_structure", columns);
+                System.out.println("✅ Table structure retrieved");
+
+            } catch (Exception e) {
+                debug.put("structure_error", e.getMessage());
+                System.out.println("❌ Cannot get table structure: " + e.getMessage());
+            }
+
+            // 3. Compter les employés
+            try {
+                Query countQuery = entityManager.createNativeQuery(
+                        "SELECT COUNT(*) as total, " +
+                                "SUM(CASE WHEN active = 1 THEN 1 ELSE 0 END) as active_count " +
+                                "FROM j_employee"
+                );
+                Object[] countResult = (Object[]) countQuery.getSingleResult();
+
+                debug.put("total_employees", countResult[0]);
+                debug.put("active_employees", countResult[1]);
+                System.out.println("✅ Employee count: total=" + countResult[0] + ", active=" + countResult[1]);
+
+            } catch (Exception e) {
+                debug.put("count_error", e.getMessage());
+                System.out.println("❌ Cannot count employees: " + e.getMessage());
+            }
+
+            // 4. Récupérer quelques exemples d'employés
+            try {
+                Query sampleQuery = entityManager.createNativeQuery(
+                        "SELECT HEX(id), first_name, last_name, email, active " +
+                                "FROM j_employee LIMIT 3"
+                );
+                @SuppressWarnings("unchecked")
+                List<Object[]> samples = sampleQuery.getResultList();
+
+                List<Map<String, Object>> sampleEmployees = new ArrayList<>();
+                for (Object[] row : samples) {
                     Map<String, Object> emp = new HashMap<>();
                     emp.put("id", row[0]);
                     emp.put("firstName", row[1]);
                     emp.put("lastName", row[2]);
                     emp.put("email", row[3]);
-                    emp.put("active", ((Number) row[4]).intValue() == 1);
-                    employees.add(emp);
+                    emp.put("active", row[4]);
+                    sampleEmployees.add(emp);
                 }
-                debug.put("sample_employees", employees);
+                debug.put("sample_employees", sampleEmployees);
+                System.out.println("✅ Sample employees retrieved: " + samples.size());
+
+            } catch (Exception e) {
+                debug.put("sample_error", e.getMessage());
+                System.out.println("❌ Cannot get sample employees: " + e.getMessage());
             }
 
-            debug.put("status", "Employee controller is working");
+            // 5. Tester la méthode EmployeeService
+            try {
+                List<Map<String, Object>> serviceResult = employeeService.getAllActiveEmployees();
+                debug.put("service_result_count", serviceResult.size());
+                debug.put("service_success", true);
+
+                if (!serviceResult.isEmpty()) {
+                    debug.put("service_first_employee", serviceResult.get(0));
+                }
+                System.out.println("✅ EmployeeService returned: " + serviceResult.size() + " employees");
+
+            } catch (Exception e) {
+                debug.put("service_error", e.getMessage());
+                debug.put("service_success", false);
+                debug.put("service_stack_trace", Arrays.toString(e.getStackTrace()));
+                System.out.println("❌ EmployeeService failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+            System.out.println("🔍 DEBUG completed, returning results");
+            return ResponseEntity.ok(debug);
 
         } catch (Exception e) {
-            debug.put("error", e.getMessage());
+            System.out.println("❌ DEBUG endpoint failed: " + e.getMessage());
             e.printStackTrace();
-        }
 
-        return ResponseEntity.ok(debug);
+            debug.put("debug_endpoint_error", e.getMessage());
+            debug.put("debug_endpoint_success", false);
+            return ResponseEntity.status(500).body(debug);
+        }
     }
+
 }

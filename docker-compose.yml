@@ -1,27 +1,4 @@
 services:
-  # ========== BASE DE DONNÉES MARIADB ==========
-  database:
-    image: mariadb:10.11
-    container_name: pokemon-planning-db
-    restart: unless-stopped
-    environment:
-      MARIADB_ROOT_PASSWORD: rootpassword
-      MARIADB_DATABASE: dev
-      MARIADB_USER: ia
-      MARIADB_PASSWORD: foufafou
-      MARIADB_AUTO_UPGRADE: 1
-    ports:
-      - "3307:3306"
-    volumes:
-      - mariadb_data:/var/lib/mysql
-    networks:
-      - pokemon-network
-    command: >
-      --innodb-buffer-pool-size=256M
-      --innodb-log-file-size=64M
-      --innodb-flush-log-at-trx-commit=1
-      --innodb-file-per-table=1
-
   # ========== BACKEND SPRING BOOT ==========
   backend:
     build:
@@ -30,17 +7,22 @@ services:
     container_name: pokemon-planning-backend
     restart: unless-stopped
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://database:3306/dev?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_PROFILES_ACTIVE=docker-local
+      # Connexion à la base locale via l'IP du bridge Docker
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://172.17.0.1:3306/dev?useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=ia
       - SPRING_DATASOURCE_PASSWORD=foufafou
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
     ports:
       - "8080:8080"
-    depends_on:
-      - database
     networks:
       - pokemon-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # ========== FRONTEND VUE ==========
   frontend:
@@ -55,11 +37,12 @@ services:
       - backend
     networks:
       - pokemon-network
-
-# ========== VOLUMES ==========
-volumes:
-  mariadb_data:
-    driver: local
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 # ========== NETWORKS ==========
 networks:

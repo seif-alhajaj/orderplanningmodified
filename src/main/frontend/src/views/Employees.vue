@@ -399,20 +399,38 @@ const employeesWithWorkload = computed(() => {
 const loadEmployees = async () => {
   loading.value = true
   try {
-    const response = await fetch('/api/frontend/employees') // ✅ Nouveau endpoint
+    console.log('🔍 Loading employees from API...')
+    const response = await fetch('/api/employees') // ✅ ENDPOINT CORRECT
+
     if (response.ok) {
       const data = await response.json()
-      employees.value = data.employees || data || []
+      console.log('✅ Employees loaded:', data.length, 'employees')
+
+      // Mapper les données pour le frontend
+      employees.value = data.map(emp => ({
+        id: emp.id,
+        firstName: emp.firstName,
+        lastName: emp.lastName,
+        email: emp.email,
+        status: emp.active ? 'AVAILABLE' : 'OFFLINE',
+        workHoursPerDay: emp.workHoursPerDay || 8,
+        workload: emp.currentLoad || 0,
+        activeOrders: emp.activeOrders || 0,
+        estimatedHours: Math.round((emp.currentLoad || 0) * (emp.workHoursPerDay || 8)),
+        totalCards: emp.totalCards || 0
+      }))
     } else {
-      console.error('Failed to load employees:', response.status)
+      console.error('Failed to load employees:', response.status, response.statusText)
+      employees.value = []
     }
   } catch (error) {
     console.error('Error loading employees:', error)
-    // Fallback demo data si besoin
+    employees.value = []
   } finally {
     loading.value = false
   }
 }
+
 const loadPlanningData = async () => {
   if (currentView.value === 'planning') {
     try {
