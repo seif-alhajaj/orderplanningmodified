@@ -1,9 +1,5 @@
 package com.pcagrade.order.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import com.pcagrade.order.entity.Order;
@@ -26,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-// ========== IMPORTS MANQUANTS POUR CORRIGER LES ERREURS ==========
+//========== MISSING IMPORTS TO FIX ERRORS ==========
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,7 +66,7 @@ public class OrderService {
             order.setOrderDate(LocalDate.now());
         }
         if (order.getPriority() == null) {
-            order.setPriority(Order.OrderPriority.MEDIUM);
+            order.setPriority(Order.OrderPriority.FAST);
         }
 
         Order savedOrder = orderRepository.save(order);
@@ -260,7 +256,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getOrdersForPlanning(int day, int month, int year) {
         try {
-            log.info("📋 Loading orders for planning since {}/{}/{} (excluding already planned)", day, month, year);
+            log.info(" Loading orders for planning since {}/{}/{} (excluding already planned)", day, month, year);
 
             String fromDate = String.format("%04d-%02d-%02d", year, month, day);
 
@@ -269,13 +265,13 @@ public class OrderService {
                 HEX(o.id) as id,
                 o.num_commande as orderNumber,
                 o.date as orderDate,
-                COALESCE(o.delai, 'MEDIUM') as deadline,
+                COALESCE(o.delai, 'FAST') as deadline,
                 COALESCE(
                     (SELECT COUNT(*) FROM card_certification_order cco 
                      WHERE cco.order_id = o.id), 10
                 ) as cardCount,
                 CASE
-                   WHEN o.delai = 'X' THEN 'Excelsiors'
+                   WHEN o.delai = 'X' THEN 'Excelsior'
                    WHEN o.delai = 'F+' THEN 'Fast+'
                    WHEN o.delai = 'F' THEN 'Fast'
                    WHEN o.delai = 'C' THEN 'Classic'
@@ -315,7 +311,7 @@ public class OrderService {
                 order.put("cardCount", ((Number) row[4]).intValue());
                 order.put("nombreCartes", ((Number) row[4]).intValue());
                 order.put("priority", (String) row[5]);
-                order.put("priorite", (String) row[5]);
+                order.put("priority", (String) row[5]);
                 order.put("status", row[6]);
                 order.put("totalPrice", row[7]);
                 order.put("prixTotal", row[7]);
@@ -323,7 +319,7 @@ public class OrderService {
                 orders.add(order);
             }
 
-            log.info("✅ {} orders loaded for planning (excluding already planned)", orders.size());
+            log.info(" {} orders loaded for planning (excluding already planned)", orders.size());
 
             // Debug stats if no orders found
             if (orders.isEmpty()) {
@@ -337,14 +333,14 @@ public class OrderService {
                 plannedQuery.setParameter(1, fromDate);
                 Number plannedOrders = (Number) plannedQuery.getSingleResult();
 
-                log.info("📊 Orders stats: Total={}, Planned={}, Remaining={}",
+                log.info(" Orders stats: Total={}, Planned={}, Remaining={}",
                         totalOrders, plannedOrders, totalOrders.intValue() - plannedOrders.intValue());
             }
 
             return orders;
 
         } catch (Exception e) {
-            log.error("❌ Error loading orders for planning: {}", e.getMessage(), e);
+            log.error(" Error loading orders for planning: {}", e.getMessage(), e);
             return new ArrayList<>();
         }
     }
@@ -549,16 +545,19 @@ public class OrderService {
     /**
      * Calculate deadline label based on priority
      */
-    private String calculateDeadlineLabel(Order order) {
-        if (order.getPriority() == Order.OrderPriority.HIGH) {
-            return "X"; // Urgent
-        } else if (order.getPriority() == Order.OrderPriority.MEDIUM) {
-            return "M"; // Medium
-        } else {
-            return "N"; // Normal
-        }
+   private String calculateDeadlineLabel(Order order) {
+    if (order.getPriority() == Order.OrderPriority.EXCELSIOR) {
+        return "X"; // Most urgent (add this new case)
+    } else if (order.getPriority() == Order.OrderPriority.FAST_PLUS) {
+        return "F+"; // Urgent
+    } else if (order.getPriority() == Order.OrderPriority.FAST) {
+        return "F"; // Medium
+    } else if (order.getPriority() == Order.OrderPriority.CLASSIC) {
+        return "C"; // Normal
+    } else {
+        return "C"; // Default fallback
     }
-
+}
 
 
     /**
@@ -568,13 +567,13 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getRecentOrdersAsMap() {
         try {
-            log.info("📋 Getting recent orders as maps for frontend");
+            log.info(" Getting recent orders as maps for frontend");
 
-            // Utiliser la méthode getRecentOrders() qui fonctionne déjà
+           // Use the getRecentOrders() method which already works
             return getRecentOrders();
 
         } catch (Exception e) {
-            log.error("❌ Error in getRecentOrdersAsMap: {}", e.getMessage(), e);
+            log.error(" Error in getRecentOrdersAsMap: {}", e.getMessage(), e);
             return new ArrayList<>();
         }
     }
@@ -608,7 +607,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getRecentOrders() {
         try {
-            log.info("📋 Frontend: Retrieving orders from June 1st, 2025");
+            log.info(" Frontend: Retrieving orders from June 1st, 2025");
 
             String sql = """
             SELECT 
@@ -645,12 +644,12 @@ public class OrderService {
 
             List<Map<String, Object>> orders = new ArrayList<>();
 
-            log.info("🔍 Orders found: {}", resultats.size());
+            log.info(" Orders found: {}", resultats.size());
 
             for (Object[] row : resultats) {
                 Map<String, Object> order = new HashMap<>();
 
-                // Données de base
+                // Basic data
                 order.put("id", (String) row[0]);
                 order.put("orderNumber", (String) row[1]);
                 order.put("orderDate", row[2]);
@@ -663,19 +662,19 @@ public class OrderService {
                 order.put("status", row[9]);
                 order.put("cardCount", ((Number) row[10]).intValue());
 
-                // Calculs additionnels
+                // Additional calculations
                 int cardCount = ((Number) row[10]).intValue();
                 order.put("estimatedTimeMinutes", cardCount * DEFAULT_PROCESSING_TIME_PER_CARD);
                 order.put("estimatedTimeHours", String.format("%.1fh",
                         (cardCount * DEFAULT_PROCESSING_TIME_PER_CARD) / 60.0));
 
-                // Priorité basée sur le type
-                String priority = "MEDIUM";
+               // Type-based priority
+                String priority = "FAST";
                 if (row[6] != null) {
                     int type = ((Number) row[6]).intValue();
-                    if (type >= 15) priority = "HIGH";
-                    else if (type >= 10) priority = "MEDIUM";
-                    else priority = "LOW";
+                    if (type >= 15) priority = "FAST+";
+                    else if (type >= 10) priority = "FAST";
+                    else priority = "CLASSIC";
                 }
                 order.put("priority", priority);
 
@@ -692,18 +691,18 @@ public class OrderService {
                 }
                 order.put("statusText", statusText);
 
-                // Valeurs par défaut
+                // Default values
                 order.put("totalPrice", 150.0 + (cardCount * 5.0));
-                order.put("qualityIndicator", cardCount > 20 ? "🔴" : cardCount > 10 ? "🟡" : "🟢");
+                order.put("qualityIndicator", cardCount > 20 ? "" : cardCount > 10 ? "" : "");
 
                 orders.add(order);
             }
 
-            log.info("✅ {} orders successfully retrieved for frontend", orders.size());
+            log.info(" {} orders successfully retrieved for frontend", orders.size());
             return orders;
 
         } catch (Exception e) {
-            log.error("❌ Error retrieving recent orders: {}", e.getMessage(), e);
+            log.error(" Error retrieving recent orders: {}", e.getMessage(), e);
             return new ArrayList<>();
         }
     }

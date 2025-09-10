@@ -35,19 +35,19 @@ public class GreedyPlanningService {
      */
     public Map<String, Object> executeGreedyPlanning(int day, int month, int year) {
         try {
-            log.info("🎲 Starting Greedy Planning for date: {}/{}/{}", day, month, year);
+            log.info("Starting Greedy Planning for date: {}/{}/{}", day, month, year);
 
             Map<String, Object> result = new HashMap<>();
 
-            // ✅ NOUVEAU: Nettoyer les planifications existantes pour cette date
+            // NEW: Clean existing plannings for this date
             cleanExistingPlanningsForDate(day, month, year);
 
             // 1. Get active employees
             List<Map<String, Object>> employees = employeeService.getAllActiveEmployees();
             if (employees.isEmpty()) {
-                log.warn("❌ No active employees found");
+                log.warn("No active employees found");
                 result.put("success", false);
-                result.put("message", "❌ No employees available");
+                result.put("message", "No employees available");
                 return result;
             }
             log.info("Found {} active employees", employees.size());
@@ -67,17 +67,17 @@ public class GreedyPlanningService {
             List<Map<String, Object>> createdPlannings = new ArrayList<>();
             int employeeIndex = 0;
 
-            // ✅ CORRECTION: Sauvegarder en base de données immédiatement pour éviter les doublons
+            // CORRECTION: Save to database immediately to avoid duplicates
             for (Map<String, Object> order : orders) {
                 int currentEmployeeIndex = employeeIndex % employees.size();
                 Map<String, Object> employee = employees.get(currentEmployeeIndex);
                 String employeeId = (String) employee.get("id");
                 String orderId = (String) order.get("id");
 
-                // ✅ Vérification finale avant création
+                // Final verification before creation
                 if (!isPlanningAlreadyExists(orderId, employeeId)) {
 
-                    // Calculer les données de planification
+                    // Calculate planning data
                     Integer cardCount = (Integer) order.get("cardCount");
                     if (cardCount == null) {
                         cardCount = (Integer) order.get("nombreCartes");
@@ -88,13 +88,13 @@ public class GreedyPlanningService {
 
                     int durationMinutes = Math.max(60, 30 + cardCount * 3);
 
-                    // ✅ Sauvegarder immédiatement en base
+                    // Save immediately to database
                     boolean saved = savePlanningToDatabase(orderId, employeeId, day, month, year, durationMinutes, cardCount);
 
                     if (saved) {
                         String employeeName = employee.get("firstName") + " " + employee.get("lastName");
 
-                        // Créer l'objet résultat
+                        // Create result object
                         Map<String, Object> planning = new HashMap<>();
                         planning.put("order_id", orderId);
                         planning.put("employee_id", employeeId);
@@ -106,17 +106,17 @@ public class GreedyPlanningService {
 
                         createdPlannings.add(planning);
 
-                        log.info("✅ Order {} assigned to employee {} (saved to DB)",
+                        log.info("Order {} assigned to employee {} (saved to DB)",
                                 order.get("orderNumber"), employeeName);
                     }
                 }
 
-                employeeIndex++; // Toujours incrémenter pour maintenir la rotation
+                employeeIndex++; // Always increment to maintain rotation
             }
 
-            // Suite du code existant...
+            // Rest of existing code...
             result.put("success", true);
-            result.put("message", String.format("✅ Greedy planning completed: %d assignments created",
+            result.put("message", String.format("Greedy planning completed: %d assignments created",
                     createdPlannings.size()));
             result.put("plannings", createdPlannings);
             result.put("totalPlannings", createdPlannings.size());
@@ -126,7 +126,7 @@ public class GreedyPlanningService {
             return result;
 
         } catch (Exception e) {
-            log.error("❌ Error in greedy planning: {}", e.getMessage(), e);
+            log.error("Error in greedy planning: {}", e.getMessage(), e);
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
             error.put("message", "Error in greedy planning: " + e.getMessage());
@@ -253,7 +253,7 @@ public class GreedyPlanningService {
 
         } catch (Exception e) {
             log.warn("Error checking existing planning: {}", e.getMessage());
-            return false; // Si erreur, on assume qu'il n'existe pas pour éviter de bloquer
+            return false; // If error, assume it doesn't exist to avoid blocking
         }
     }
     private void cleanExistingPlanningsForDate(int day, int month, int year) {
@@ -269,7 +269,7 @@ public class GreedyPlanningService {
             deleteQuery.setParameter(1, targetDate);
 
             int deletedCount = deleteQuery.executeUpdate();
-            log.info("🗑️ Cleaned {} existing plannings for date {}", deletedCount, targetDate);
+            log.info("Cleaned {} existing plannings for date {}", deletedCount, targetDate);
 
         } catch (Exception e) {
             log.warn("Error cleaning existing plannings: {}", e.getMessage());
@@ -280,7 +280,7 @@ public class GreedyPlanningService {
                                            int durationMinutes, int cardCount) {
         try {
             LocalDate planningDate = LocalDate.of(year, month, day);
-            LocalTime startTime = LocalTime.of(9, 0); // Heure de début par défaut
+            LocalTime startTime = LocalTime.of(9, 0); // Default start time
             LocalDateTime startDateTime = LocalDateTime.of(planningDate, startTime);
             LocalDateTime endDateTime = startDateTime.plusMinutes(durationMinutes);
 
@@ -303,7 +303,7 @@ public class GreedyPlanningService {
             insertQuery.setParameter(6, endDateTime);
             insertQuery.setParameter(7, durationMinutes);
             insertQuery.setParameter(8, endDateTime);
-            insertQuery.setParameter(9, "MEDIUM");
+            insertQuery.setParameter(9, "FAST");
             insertQuery.setParameter(10, "SCHEDULED");
             insertQuery.setParameter(11, 0); // completed = false
             insertQuery.setParameter(12, cardCount);

@@ -1,16 +1,29 @@
 package com.pcagrade.order.entity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import com.pcagrade.order.util.AbstractUlidEntity;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * Order entity representing Pokemon card orders
@@ -50,7 +63,7 @@ public class Order extends AbstractUlidEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "priority", nullable = false, length = 10)
     @Builder.Default
-    private OrderPriority priority = OrderPriority.MEDIUM;
+    private OrderPriority priority = OrderPriority.FAST;
 
     /**
      * Total price of the order (removed precision and scale for Double)
@@ -135,9 +148,10 @@ public class Order extends AbstractUlidEntity {
      * Order priority levels
      */
     public enum OrderPriority {
-        HIGH,     // 1 week - price >= 1000€
-        MEDIUM,   // 2 weeks - price >= 500€
-        LOW       // 4 weeks - price < 500€
+        EXCELSIOR,     // 1 week - price >= 1000€
+        FAST_PLUS,   // 2 weeks - price >= 500€
+        FAST,      // 4 weeks - price < 500€
+        CLASSIC    // 8 weeks - price < 100€
     }
 
     /**
@@ -168,7 +182,7 @@ public class Order extends AbstractUlidEntity {
             this.orderDate = LocalDate.now();
         }
         if (this.priority == null) {
-            this.priority = OrderPriority.MEDIUM;
+            this.priority = OrderPriority.FAST;
         }
         if (this.status == null) {
             this.status = OrderStatus.PENDING;
@@ -213,7 +227,7 @@ public class Order extends AbstractUlidEntity {
      * Check if order is high priority
      */
     public boolean isHighPriority() {
-        return priority == OrderPriority.HIGH;
+        return priority == OrderPriority.FAST_PLUS;
     }
 
     /**
@@ -259,13 +273,15 @@ public class Order extends AbstractUlidEntity {
     /**
      * Get formatted priority display
      */
-    public String getPriorityDisplay() {
-        return switch (priority) {
-            case HIGH -> "Haute priorité";
-            case MEDIUM -> "Priorité normale";
-            case LOW -> "Basse priorité";
-        };
-    }
+   public String getPriorityDisplay() {
+    return switch (priority) {
+        case EXCELSIOR -> "Priorité Excelsior";
+        case FAST_PLUS -> "Priorité Fast+";
+        case FAST -> "Priorité Fast";
+        case CLASSIC -> "Priorité Classique";
+    };
+}
+    
 
     /**
      * Get formatted status display

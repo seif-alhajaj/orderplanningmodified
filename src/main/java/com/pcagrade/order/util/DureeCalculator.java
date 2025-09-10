@@ -5,91 +5,91 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * Classe utilitaire pour standardiser le calcul de durée des commandes
+ * Utility class for standardizing order duration calculation
  *
- * RÈGLE MÉTIER : Durée = 3 × nombre de cartes
- * - Chaque carte nécessite 3 unités de temps de certification
- * - Durée minimale : 3 minutes (1 carte minimum)
- * - Durée par défaut si données manquantes : 60 minutes
+ * BUSINESS RULE: Duration = 3 × number of cards
+ * - Each card requires 3 units of certification time
+ * - Minimum duration: 3 minutes (1 card minimum)
+ * - Default duration if missing data: 60 minutes
  */
 @Component
 public class DureeCalculator {
 
     /**
-     * Constante : temps de certification par carte (en minutes)
+     * Constant: certification time per card (in minutes)
      */
     public static final int TEMPS_CERTIFICATION_PAR_CARTE = 3;
 
     /**
-     * Durée par défaut si impossible de calculer (en minutes)
+     * Default duration if unable to calculate (in minutes)
      */
     public static final int DUREE_DEFAUT_MINUTES = 60;
 
     /**
-     * Durée minimale d'une commande (en minutes)
+     * Minimum order duration (in minutes)
      */
-    public static final int DUREE_MINIMALE_MINUTES = 3; // 1 carte minimum
+    public static final int DUREE_MINIMALE_MINUTES = 3; // 1 card minimum
 
     /**
-     * Calcule la durée d'une commande basée sur le nombre de cartes
+     * Calculates order duration based on number of cards
      *
-     * @param nombreCartes Nombre de cartes dans la commande
-     * @return Durée en minutes (3 × nombreCartes)
+     * @param nombreCartes Number of cards in the order
+     * @return Duration in minutes (3 × nombreCartes)
      */
     public static int calculerDureeMinutes(int nombreCartes) {
         if (nombreCartes <= 0) {
-            return DUREE_MINIMALE_MINUTES; // 1 carte minimum
+            return DUREE_MINIMALE_MINUTES; // 1 card minimum
         }
         return nombreCartes * TEMPS_CERTIFICATION_PAR_CARTE;
     }
 
     /**
-     * Calcule la durée d'une commande à partir des données de la base
+     * Calculates order duration from database data
      *
-     * @param commandeData Map contenant les données de la commande
-     * @return Durée en minutes calculée selon les règles métier
+     * @param commandeData Map containing order data
+     * @return Duration in minutes calculated according to business rules
      */
     public static int calculerDureeDepuisCommande(Map<String, Object> commandeData) {
         try {
-            // 1. Priorité au nombre de cartes réelles
+            // 1. Priority to real number of cards
             Integer nombreCartesReelles = (Integer) commandeData.get("nombreCartesReelles");
             if (nombreCartesReelles != null && nombreCartesReelles > 0) {
                 return calculerDureeMinutes(nombreCartesReelles);
             }
 
-            // 2. Fallback sur nombreCartes
+            // 2. Fallback to nombreCartes
             Integer nombreCartes = (Integer) commandeData.get("nombreCartes");
             if (nombreCartes != null && nombreCartes > 0) {
                 return calculerDureeMinutes(nombreCartes);
             }
 
-            // 3. Fallback sur dureeMinutes existante si cohérente
+            // 3. Fallback to existing dureeMinutes if consistent
             Integer dureeExistante = (Integer) commandeData.get("dureeMinutes");
             if (dureeExistante != null && dureeExistante >= DUREE_MINIMALE_MINUTES) {
-                // Vérifier si cette durée est cohérente avec la règle des cartes
+                // Check if this duration is consistent with the card rule
                 int cartesImpliquees = dureeExistante / TEMPS_CERTIFICATION_PAR_CARTE;
                 if (dureeExistante == cartesImpliquees * TEMPS_CERTIFICATION_PAR_CARTE) {
-                    return dureeExistante; // Durée cohérente
+                    return dureeExistante; // Consistent duration
                 }
             }
 
-            // 4. Dernier recours : durée par défaut
-            System.out.println("⚠️ Aucune donnée de cartes pour commande " +
-                    commandeData.get("numeroCommande") + ", utilisation durée par défaut");
+            // 4. Last resort: default duration
+            System.out.println("No card data for order " +
+                    commandeData.get("numeroCommande") + ", using default duration");
             return DUREE_DEFAUT_MINUTES;
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur calcul durée pour commande " +
+            System.err.println("Duration calculation error for order " +
                     commandeData.get("numeroCommande") + ": " + e.getMessage());
             return DUREE_DEFAUT_MINUTES;
         }
     }
 
     /**
-     * Convertit une durée en minutes vers un format lisible
+     * Converts duration in minutes to a readable format
      *
-     * @param dureeMinutes Durée en minutes
-     * @return Format "Xh Ymin" ou "Ymin"
+     * @param dureeMinutes Duration in minutes
+     * @return Format "Xh Ymin" or "Ymin"
      */
     public static String formaterDuree(int dureeMinutes) {
         if (dureeMinutes < 60) {
@@ -107,22 +107,22 @@ public class DureeCalculator {
     }
 
     /**
-     * Calcule le nombre de cartes théorique basé sur la durée
-     * Utile pour la validation inverse
+     * Calculates theoretical number of cards based on duration
+     * Useful for reverse validation
      *
-     * @param dureeMinutes Durée en minutes
-     * @return Nombre de cartes théorique
+     * @param dureeMinutes Duration in minutes
+     * @return Theoretical number of cards
      */
     public static int calculerNombreCartesTheorique(int dureeMinutes) {
         return Math.max(1, dureeMinutes / TEMPS_CERTIFICATION_PAR_CARTE);
     }
 
     /**
-     * Valide la cohérence entre nombre de cartes et durée
+     * Validates consistency between number of cards and duration
      *
-     * @param nombreCartes Nombre de cartes déclaré
-     * @param dureeMinutes Durée déclarée
-     * @return true si cohérent, false sinon
+     * @param nombreCartes Declared number of cards
+     * @param dureeMinutes Declared duration
+     * @return true if consistent, false otherwise
      */
     public static boolean validerCoherence(int nombreCartes, int dureeMinutes) {
         int dureeAttendue = calculerDureeMinutes(nombreCartes);
@@ -130,27 +130,27 @@ public class DureeCalculator {
     }
 
     /**
-     * Génère un rapport de calcul de durée pour debug
+     * Generates a duration calculation report for debugging
      *
-     * @param commandeData Données de la commande
-     * @return Rapport détaillé du calcul
+     * @param commandeData Order data
+     * @return Detailed calculation report
      */
     public static String genererRapportCalcul(Map<String, Object> commandeData) {
         StringBuilder rapport = new StringBuilder();
-        rapport.append("🔍 Calcul durée commande ").append(commandeData.get("numeroCommande")).append(":\n");
+        rapport.append("Duration calculation for order ").append(commandeData.get("numeroCommande")).append(":\n");
 
         Integer nombreCartesReelles = (Integer) commandeData.get("nombreCartesReelles");
         Integer nombreCartes = (Integer) commandeData.get("nombreCartes");
         Integer dureeExistante = (Integer) commandeData.get("dureeMinutes");
 
-        rapport.append("- Cartes réelles: ").append(nombreCartesReelles).append("\n");
-        rapport.append("- Cartes déclarées: ").append(nombreCartes).append("\n");
-        rapport.append("- Durée existante: ").append(dureeExistante).append(" min\n");
+        rapport.append("- Real cards: ").append(nombreCartesReelles).append("\n");
+        rapport.append("- Declared cards: ").append(nombreCartes).append("\n");
+        rapport.append("- Existing duration: ").append(dureeExistante).append(" min\n");
 
         int dureeCalculee = calculerDureeDepuisCommande(commandeData);
-        rapport.append("- Durée calculée: ").append(dureeCalculee).append(" min (");
+        rapport.append("- Calculated duration: ").append(dureeCalculee).append(" min (");
         rapport.append(formaterDuree(dureeCalculee)).append(")\n");
-        rapport.append("- Cartes impliquées: ").append(calculerNombreCartesTheorique(dureeCalculee));
+        rapport.append("- Cards involved: ").append(calculerNombreCartesTheorique(dureeCalculee));
 
         return rapport.toString();
     }

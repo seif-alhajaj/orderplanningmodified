@@ -1,10 +1,10 @@
-// src/services/api.js - VERSION QUI FONCTIONNE AVEC VOS ENDPOINTS
+// src/services/api.js - VERSION THAT WORKS WITH YOUR ENDPOINTS
 const API_BASE_URL = 'http://localhost:8080'
 
 class ApiService {
 
   /**
-   * 🔧 Méthode générique de requête
+   * Generic query method
    */
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`
@@ -18,7 +18,7 @@ class ApiService {
     }
 
     try {
-      console.log(`🔄 API Request: ${options.method || 'GET'} ${url}`)
+      console.log(`API Request: ${options.method || 'GET'} ${url}`)
       const response = await fetch(url, config)
 
       if (!response.ok) {
@@ -26,51 +26,51 @@ class ApiService {
       }
 
       const data = await response.json()
-      console.log(`✅ API Response: ${endpoint} - ${Array.isArray(data) ? data.length : 'object'} items`)
+      console.log(`API Response: ${endpoint} - ${Array.isArray(data) ? data.length : 'object'} items`)
       return data
 
     } catch (error) {
-      console.error(`❌ API Error for ${endpoint}:`, error)
+      console.error(`API Error for ${endpoint}:`, error)
       throw error
     }
   }
 
   /**
-   * 👥 EMPLOYÉS - Utilise l'endpoint qui fonctionne
+   * EMPLOYEES - Use the endpoint that works
    */
   async getEmployees() {
     try {
       const employees = await this.request('/api/employees')
-      console.log(`✅ ${employees.length} employés récupérés`)
-
-      // Mapper vers le format attendu par le frontend
+      console.log(`${employees.length} employees retrieved`)
+      // Map to the format expected by the frontend
       return employees.map(emp => ({
         id: emp.id,
-        firstName: emp.firstName,
-        lastName: emp.lastName,
-        fullName: emp.fullName || `${emp.firstName} ${emp.lastName}`,
+        firstName: emp.first_name || emp.firstName,
+        lastName: emp.last_name || emp.lastName,
+        fullName: emp.fullName || `${emp.first_name || emp.firstName} ${emp.last_name || emp.lastName}`,
         email: emp.email,
-        workHoursPerDay: emp.workHoursPerDay,
-        active: emp.active,
+        role: emp.role || 'GRADER', // Added role with default
+        workHoursPerDay: emp.work_hours_per_day || emp.workHoursPerDay || 8,
+        active: emp.active !== undefined ? emp.active : true,
         available: emp.available,
         currentLoad: emp.currentLoad || 0,
-        name: emp.name || emp.fullName
+        name: emp.name || emp.fullName || `${emp.first_name || emp.firstName} ${emp.last_name || emp.lastName}`
       }))
     } catch (error) {
-      console.error('❌ Erreur récupération employés:', error)
+      console.error('Employee retrieval error:', error)
       return []
     }
   }
 
   /**
-   * 📦 COMMANDES - Utilise l'endpoint qui fonctionne
+   * ORDERS - Use the endpoint that works
    */
   async getOrders() {
     try {
       const orders = await this.request('/api/orders')
-      console.log(`✅ ${orders.length} commandes récupérées`)
+      console.log(`${orders.length} orders retrieved`)
 
-      // Mapper vers le format attendu par le frontend
+      // Map to the format expected by the frontend
       return orders.map(order => ({
         id: order.id,
         orderNumber: order.orderNumber,
@@ -91,13 +91,13 @@ class ApiService {
         unsealing: order.unsealing
       }))
     } catch (error) {
-      console.error('❌ Erreur récupération commandes:', error)
+      console.error('Error retrieving orders:', error)
       return []
     }
   }
 
   /**
-   * 📅 PLANIFICATIONS - Test plusieurs endpoints possibles
+   * PLANNINGS - Test several possible endpoints
    */
   async getPlanning() {
     const endpoints = [
@@ -108,48 +108,51 @@ class ApiService {
     for (const endpoint of endpoints) {
       try {
         const data = await this.request(endpoint)
-        console.log(`✅ Planning récupéré via: ${endpoint}`)
+        console.log(`Planning retrieved via: ${endpoint}`)
         return Array.isArray(data) ? data : []
       } catch (error) {
-        console.log(`❌ Échec endpoint ${endpoint}`)
+        console.log(`Failed endpoint ${endpoint}`)
         continue
       }
     }
 
-    console.warn('⚠️ Aucun endpoint planifications disponible')
+    console.warn('No planning endpoints available')
     return []
   }
 
   /**
-   * 🚀 GÉNÉRATION DE PLANIFICATION
+   * Generation of planning
    */
   async generatePlanning(config = {}) {
     try {
       const body = {
-        startDate: config.startDate || '2025-06-01',
+        startDate: config.startDate || new Date().toISOString().split('T')[0],
         timePerCard: config.timePerCard || 3,
         cleanFirst: config.cleanFirst || false,
         ...config
       }
 
-      console.log('🚀 Génération planification avec:', body)
+      console.log('Generating planning:', body)
 
       const result = await this.request('/api/planning/generate', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(body)
       })
 
-      console.log('✅ Planification générée:', result)
+      console.log('Planning generated:', result)
       return result
 
     } catch (error) {
-      console.error('❌ Erreur génération planification:', error)
+      console.error('Planning generation error:', error)
       throw error
     }
   }
 
   /**
-   * 📊 STATISTIQUES - Calculées à partir des données existantes
+   * STATISTICS - Calculated from existing data
    */
   async getStats() {
     try {
@@ -159,14 +162,13 @@ class ApiService {
         this.getPlanning()
       ])
 
-      // Calculer des statistiques utiles
+      // Calculate useful statistics
       const stats = {
         employeesCount: employees.length,
         activeEmployees: employees.filter(e => e.active).length,
         ordersCount: orders.length,
         planningCount: planning.length,
-
-        // Statistiques des commandes par priorité
+        // Order statistics by priority
         ordersByPriority: {
           EXCELSIOR: orders.filter(o => o.priority === 'EXCELSIOR').length,
           FAST_PLUS: orders.filter(o => o.priority === 'FAST+').length,
@@ -174,14 +176,14 @@ class ApiService {
           CLASSIC: orders.filter(o => o.priority === 'CLASSIC').length
         },
 
-        // Statistiques des commandes par statut
+        // Order statistics by status
         ordersByStatus: {
           PENDING: orders.filter(o => o.status === 1).length,
           IN_PROGRESS: orders.filter(o => o.status === 2).length,
           COMPLETED: orders.filter(o => o.status === 3).length
         },
 
-        // Temps total estimé
+        // Total estimated time
         totalEstimatedMinutes: orders.reduce((sum, o) => sum + (o.estimatedTimeMinutes || 0), 0),
         totalCards: orders.reduce((sum, o) => sum + (o.cardCount || 0), 0),
         totalPrice: orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0),
@@ -190,11 +192,11 @@ class ApiService {
         lastUpdate: new Date().toISOString()
       }
 
-      console.log('📊 Calculated statistics::', stats)
+      console.log('Calculated statistics:', stats)
       return stats
 
     } catch (error) {
-      console.error('❌ Error calculating statistics:', error)
+      console.error('Error calculating statistics:', error)
       return {
         employeesCount: 0,
         ordersCount: 0,
@@ -206,64 +208,71 @@ class ApiService {
   }
 
   /**
-   * 🏥 TEST DE SANTÉ DU BACKEND
+   * BACKEND HEALTH CHECK
    */
   async healthCheck() {
     try {
-      // Test direct sur un endpoint qui fonctionne
+      // Direct test on a working endpoint
       const response = await fetch(`${API_BASE_URL}/api/employees`)
       const isHealthy = response.ok
 
       if (isHealthy) {
-        console.log('✅ Backend Health: OK')
+        console.log('Backend Health: OK')
       } else {
-        console.log(`❌ Backend Health: HTTP ${response.status}`)
+        console.log(`Backend Health: HTTP ${response.status}`)
       }
 
-      return isHealthy
+      return {
+        healthy: isHealthy,
+        status: response.status,
+        statusText: response.statusText
+      }
 
     } catch (error) {
-      console.error('❌ Backend Health Check Failed:', error)
-      return false
+      console.error('Backend Health Check Failed:', error)
+      return {
+        healthy: false,
+        error: error.message
+      }
     }
   }
 
   /**
-   * 🎯 MÉTHODES SPÉCIFIQUES POUR POKÉMON
+   * SPECIFIC METHODS FOR POKEMON
    */
 
-  // Obtenir les commandes depuis juin 2025
+  // Get orders since June 2025
   async getOrdersSinceJune2025() {
     try {
       const allOrders = await this.getOrders()
 
-      // Filtrer les commandes depuis juin 2025
+      // Filter orders since June 2025
       const june2025 = new Date('2025-06-01')
       const filteredOrders = allOrders.filter(order => {
         const orderDate = new Date(order.creationDate || order.orderDate)
         return orderDate >= june2025
       })
 
-      console.log(`📦 ${filteredOrders.length} commandes depuis juin 2025`)
+      console.log(`${filteredOrders.length} orders since June 2025`)
       return filteredOrders
 
     } catch (error) {
-      console.error('❌ Erreur commandes juin 2025:', error)
+      console.error('Error getting orders since June 2025:', error)
       return []
     }
   }
 
-  // Obtenir les employés actifs avec leur charge
+  // Get active employees with their load
   async getActiveEmployeesWithLoad() {
     try {
       const employees = await this.getEmployees()
       const activeEmployees = employees.filter(emp => emp.active && emp.available)
 
-      console.log(`👥 ${activeEmployees.length} Active Employees`)
+      console.log(`${activeEmployees.length} active employees`)
       return activeEmployees
 
     } catch (error) {
-      console.error('❌ Active employees error:', error)
+      console.error('Error getting active employees:', error)
       return []
     }
   }
@@ -273,7 +282,7 @@ class ApiService {
 const apiService = new ApiService()
 export default apiService
 
-// Pour debug dans la console
+// For debugging in the console
 if (typeof window !== 'undefined') {
   window.apiService = apiService
 }

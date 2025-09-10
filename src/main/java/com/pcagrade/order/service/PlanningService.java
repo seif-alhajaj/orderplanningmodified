@@ -15,8 +15,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 🎴 SERVICE DE PLANIFICATION POKÉMON - VERSION AMÉLIORÉE
- * Remplace l'ancien PlanningService avec des algorithmes optimisés
+ * POKEMON PLANNING SERVICE - IMPROVED VERSION
+ * Replaces the old PlanningService with optimized algorithms
  */
 @Service
 @Slf4j
@@ -25,92 +25,92 @@ public class PlanningService {
     @Autowired
     private EntityManager entityManager;
 
-    // ========== CONSTANTES ==========
+    // ========== CONSTANTS ==========
     private static final int MINUTES_PER_CARD = 3;
     private static final LocalDate DEFAULT_START_DATE = LocalDate.of(2025, 6, 1);
     private static final LocalTime WORK_START_TIME = LocalTime.of(9, 0);
     private static final LocalTime WORK_END_TIME = LocalTime.of(17, 0);
 
-    // ========== MÉTHODES PUBLIQUES PRINCIPALES ==========
+    // ========== MAIN PUBLIC METHODS ==========
 
     /**
-     * 🚀 GÉNÉRATION OPTIMISÉE DE PLANIFICATION
-     * Remplace generatePlanningBatch avec algorithme amélioré
+     * OPTIMIZED PLANNING GENERATION
+     * Replaces generatePlanningBatch with improved algorithm
      */
     @Transactional
     public Map<String, Object> generatePlanningBatch(String dateDebut, int nombreEmployes, int tempsParCarte) {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            log.info("🎮 Démarrage génération planification optimisée depuis: {}", dateDebut);
+            log.info("Starting optimized planning generation from: {}", dateDebut);
 
             LocalDate startDate = dateDebut != null ?
                     LocalDate.parse(dateDebut) : DEFAULT_START_DATE;
             int timePerCard = tempsParCarte > 0 ? tempsParCarte : MINUTES_PER_CARD;
 
-            // 1. 📊 CHARGEMENT DES DONNÉES
+            // 1. DATA LOADING
             List<Map<String, Object>> orders = loadOrdersByPriority(startDate);
             List<Map<String, Object>> employees = loadAvailableEmployees();
 
             if (orders.isEmpty()) {
                 result.put("success", true);
-                result.put("message", "Aucune commande à planifier");
+                result.put("message", "No orders to plan");
                 result.put("ordersProcessed", 0);
                 return result;
             }
 
             if (employees.isEmpty()) {
                 result.put("success", false);
-                result.put("message", "Aucun employé disponible");
+                result.put("message", "No employees available");
                 return result;
             }
 
-            log.info("📦 {} commandes à traiter avec {} employés", orders.size(), employees.size());
+            log.info("{} orders to process with {} employees", orders.size(), employees.size());
 
-            // 2. 🔄 ALGORITHME DE RÉPARTITION OPTIMISÉ
+            // 2. OPTIMIZED DISTRIBUTION ALGORITHM
             List<EmployeeWorkload> workloads = initializeWorkloads(employees);
             List<Map<String, Object>> createdPlannings = new ArrayList<>();
             int planningsSaved = 0;
 
-// ✅ NOUVEAU: Nettoyer les planifications existantes pour éviter les doublons
+// NEW: Clean existing plannings to avoid duplicates
             cleanExistingPlannings(startDate);
 
-// ✅ NOUVEAU: Map pour suivre les assignations et éviter les doublons
+// NEW: Map to track assignments and avoid duplicates
             Set<String> assignedOrders = new HashSet<>();
 
             for (Map<String, Object> order : orders) {
                 try {
                     String orderId = (String) order.get("id");
 
-                    // ✅ Vérifier si cette commande a déjà été assignée
+                    // Check if this order has already been assigned
                     if (assignedOrders.contains(orderId)) {
                         log.warn("Order {} already assigned, skipping", order.get("numCommande"));
                         continue;
                     }
 
-                    // ✅ Vérifier en base de données aussi
+                    // Also check in database
                     if (isPlanningExistsForOrder(orderId)) {
                         log.warn("Order {} already has planning in database, skipping", order.get("numCommande"));
                         assignedOrders.add(orderId);
                         continue;
                     }
 
-                    // Trouver l'employé le moins chargé
+                    // Find the least busy employee
                     EmployeeWorkload leastBusy = findLeastBusyEmployee(workloads);
 
-                    // Calculer la durée et le timing
+                    // Calculate duration and timing
                     Integer cardCount = (Integer) order.get("nombreCartes");
                     if (cardCount == null || cardCount <= 0) cardCount = 1;
 
                     int durationMinutes = cardCount * timePerCard;
                     LocalDateTime startTime = calculateOptimalStartTime(leastBusy, order);
 
-                    // Créer la planification
+                    // Create the planning
                     String planningId = UUID.randomUUID().toString().replace("-", "");
                     String employeeId = leastBusy.getEmployee().get("id").toString();
-                    String priority = (String) order.getOrDefault("priorite", "MEDIUM");
+                    String priority = (String) order.getOrDefault("priority", "FAST");
 
-                    // Sauvegarder en base
+                    // Save to database
                     boolean saved = savePlanningOptimized(
                             planningId, orderId, employeeId,
                             startTime.toLocalDate(), startTime,
@@ -118,12 +118,12 @@ public class PlanningService {
 
                     if (saved) {
                         planningsSaved++;
-                        assignedOrders.add(orderId); // ✅ Marquer comme assigné
+                        assignedOrders.add(orderId); // Mark as assigned
 
-                        // Mettre à jour la charge de travail
+                        // Update workload
                         leastBusy.addWorkload(durationMinutes, startTime);
 
-                        // Ajouter au résultat
+                        // Add to result
                         Map<String, Object> planningResult = new HashMap<>();
                         planningResult.put("id", planningId);
                         planningResult.put("orderId", orderId);
@@ -137,19 +137,19 @@ public class PlanningService {
 
                         createdPlannings.add(planningResult);
 
-                        log.info("✅ Order {} assigned to employee {} (duration: {}min)",
+                        log.info("Order {} assigned to employee {} (duration: {}min)",
                                 order.get("numCommande"),
                                 planningResult.get("employeeName"),
                                 durationMinutes);
                     }
 
                 } catch (Exception orderError) {
-                    log.error("❌ Error processing order {}: {}",
+                    log.error("Error processing order {}: {}",
                             order.get("numCommande"), orderError.getMessage());
                 }
             }
 
-            // 3. 📊 STATISTIQUES FINALES
+            // 3. FINAL STATISTICS
             int totalCards = createdPlannings.stream()
                     .mapToInt(p -> (Integer) p.get("cardCount"))
                     .sum();
@@ -158,7 +158,7 @@ public class PlanningService {
                     .sum();
 
             result.put("success", true);
-            result.put("message", String.format("🎉 Planification terminée - %d plannings créés", planningsSaved));
+            result.put("message", String.format("Planning completed - %d plannings created", planningsSaved));
             result.put("ordersProcessed", orders.size());
             result.put("employeesUsed", Math.min(employees.size(), workloads.size()));
             result.put("planningsSaved", planningsSaved);
@@ -169,22 +169,22 @@ public class PlanningService {
             result.put("timePerCardMinutes", timePerCard);
             result.put("startDate", startDate.toString());
 
-            log.info("🎉 GÉNÉRATION TERMINÉE - {} plannings sauvés, {} cartes, {}h",
+            log.info("GENERATION COMPLETED - {} plannings saved, {} cards, {}h",
                     planningsSaved, totalCards, String.format("%.1f", totalMinutes / 60.0));
 
             return result;
 
         } catch (Exception e) {
-            log.error("❌ Erreur génération planification: {}", e.getMessage(), e);
+            log.error("Planning generation error: {}", e.getMessage(), e);
             result.put("success", false);
-            result.put("message", "Erreur: " + e.getMessage());
+            result.put("message", "Error: " + e.getMessage());
             return result;
         }
     }
 
     /**
-     * 💾 SAUVEGARDE UNITAIRE CONSERVÉE (pour compatibilité)
-     * Garde la même signature que l'ancienne méthode
+     * SINGLE SAVE KEPT (for compatibility)
+     * Keeps the same signature as the old method
      */
     @Transactional
     public boolean savePlanning(String orderId, String employeeId, LocalDate planningDate,
@@ -195,10 +195,10 @@ public class PlanningService {
                 durationMinutes, priority, durationMinutes / MINUTES_PER_CARD);
     }
 
-    // ========== MÉTHODES NOUVELLES ET OPTIMISÉES ==========
+    // ========== NEW AND OPTIMIZED METHODS ==========
 
     /**
-     * 🔍 CHARGEMENT DES COMMANDES PAR PRIORITÉ
+     * LOAD ORDERS BY PRIORITY
      */
     private List<Map<String, Object>> loadOrdersByPriority(LocalDate fromDate) {
         try {
@@ -216,7 +216,7 @@ public class PlanningService {
                   AND o.statut = 1 
                 ORDER BY
                     CASE o.priorite
-                           WHEN 'EXCELSIORS' THEN 4
+                           WHEN 'EXCELSIOR' THEN 4
                            WHEN 'FAST+' THEN 3 
                            WHEN 'FAST' THEN 2
                            WHEN 'CLASSIC' THEN 1
@@ -244,31 +244,31 @@ public class PlanningService {
                 orders.add(order);
             }
 
-            log.info("📦 Chargement de {} commandes depuis {}", orders.size(), fromDate);
+            log.info("Loaded {} orders from {}", orders.size(), fromDate);
             return orders;
 
         } catch (Exception e) {
-            log.error("❌ Erreur chargement commandes: {}", e.getMessage());
+            log.error("Error loading orders: {}", e.getMessage());
             return new ArrayList<>();
         }
     }
 
     /**
-     * 👥 CHARGEMENT DES EMPLOYÉS DISPONIBLES
+     * LOAD AVAILABLE EMPLOYEES
      */
     private List<Map<String, Object>> loadAvailableEmployees() {
         try {
-            String sql = """
-                SELECT 
+           String sql = """
+    SELECT 
                     HEX(e.id) as id,
                     e.first_name as firstName,
                     e.last_name as lastName,
                     e.email as email,
                     e.work_hours_per_day as workHoursPerDay
-                FROM j_employee e 
-                WHERE e.active = 1 
-                ORDER BY e.work_hours_per_day DESC
-            """;
+    FROM j_employee e 
+    WHERE e.active = 1 
+    ORDER BY e.work_hours_per_day DESC
+""";
 
             Query query = entityManager.createNativeQuery(sql);
             @SuppressWarnings("unchecked")
@@ -285,17 +285,17 @@ public class PlanningService {
                 employees.add(employee);
             }
 
-            log.info("👥 Chargement de {} employés actifs", employees.size());
+            log.info("Loaded {} active employees", employees.size());
             return employees;
 
         } catch (Exception e) {
-            log.error("❌ Erreur chargement employés: {}", e.getMessage());
+            log.error("Error loading employees: {}", e.getMessage());
             return new ArrayList<>();
         }
     }
 
     /**
-     * 💾 SAUVEGARDE OPTIMISÉE
+     * OPTIMIZED SAVE
      */
     private boolean savePlanningOptimized(String planningId, String orderId, String employeeId,
                                           LocalDate planningDate, LocalDateTime startTime,
@@ -329,15 +329,15 @@ public class PlanningService {
             return result > 0;
 
         } catch (Exception e) {
-            log.error("❌ Erreur sauvegarde planning: {}", e.getMessage());
+            log.error("Error saving planning: {}", e.getMessage());
             return false;
         }
     }
 
-    // ========== CLASSES UTILITAIRES ==========
+    // ========== UTILITY CLASSES ==========
 
     /**
-     * 🏗️ INITIALISATION DES CHARGES DE TRAVAIL
+     * WORKLOAD INITIALIZATION
      */
     private List<EmployeeWorkload> initializeWorkloads(List<Map<String, Object>> employees) {
         return employees.stream()
@@ -346,39 +346,39 @@ public class PlanningService {
     }
 
     /**
-     * 🔍 RECHERCHE DE L'EMPLOYÉ LE MOINS CHARGÉ
+     * FIND LEAST BUSY EMPLOYEE
      */
     private EmployeeWorkload findLeastBusyEmployee(List<EmployeeWorkload> workloads) {
         return workloads.stream()
                 .min(Comparator.comparing(EmployeeWorkload::getCurrentWorkloadMinutes))
-                .orElseThrow(() -> new RuntimeException("Aucun employé disponible"));
+                .orElseThrow(() -> new RuntimeException("No employee available"));
     }
 
     /**
-     * ⏰ CALCUL DU CRÉNEAU OPTIMAL
+     * CALCULATE OPTIMAL TIME SLOT
      */
     private LocalDateTime calculateOptimalStartTime(EmployeeWorkload workload, Map<String, Object> order) {
         LocalDateTime baseTime = DEFAULT_START_DATE.atTime(WORK_START_TIME);
 
-        // Si l'employé a déjà du travail, programmer après
+        // If employee already has work, schedule after
         if (workload.getLastEndTime() != null) {
-            baseTime = workload.getLastEndTime().plusMinutes(15); // 15min de pause
+            baseTime = workload.getLastEndTime().plusMinutes(15); // 15min break
         }
 
-        // Pour les urgences : essayer de programmer plus tôt
+        // For urgent orders: try to schedule earlier
         String priority = (String) order.get("priorite");
         if ("EXCELSIOR".equals(priority) && baseTime.getHour() > 10) {
-            // Essayer de caler en début de matinée
+            // Try to schedule in the morning
             baseTime = baseTime.withHour(9).withMinute(0);
         }
 
         return baseTime;
     }
 
-    // ========== CLASSE INTERNE POUR GESTION DES CHARGES ==========
+    // ========== INTERNAL CLASS FOR WORKLOAD MANAGEMENT ==========
 
     /**
-     * 📈 CLASSE POUR SUIVRE LA CHARGE DE TRAVAIL PAR EMPLOYÉ
+     * CLASS TO TRACK EMPLOYEE WORKLOAD
      */
     private static class EmployeeWorkload {
         private final Map<String, Object> employee;
@@ -408,7 +408,7 @@ public class PlanningService {
     }
 
     /**
-     * Nettoyer les planifications existantes pour éviter les doublons
+     * Clean existing plannings to avoid duplicates
      */
     private void cleanExistingPlannings(LocalDate fromDate) {
         try {
@@ -422,7 +422,7 @@ public class PlanningService {
             deleteQuery.setParameter(1, fromDate);
 
             int deletedCount = deleteQuery.executeUpdate();
-            log.info("🗑️ Cleaned {} recent plannings from date {}", deletedCount, fromDate);
+            log.info("Cleaned {} recent plannings from date {}", deletedCount, fromDate);
 
         } catch (Exception e) {
             log.warn("Error cleaning existing plannings: {}", e.getMessage());
@@ -430,7 +430,7 @@ public class PlanningService {
     }
 
     /**
-     * Vérifier si une commande a déjà une planification
+     * Check if an order already has a planning
      */
     private boolean isPlanningExistsForOrder(String orderId) {
         try {

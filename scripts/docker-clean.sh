@@ -1,15 +1,15 @@
 # ========== SCRIPT 4: docker-clean.sh ==========
 #!/bin/bash
-echo "🧹 NETTOYAGE DOCKER"
+echo " DOCKER CLEANING"
 echo "==================="
 
-# Arrêter et supprimer tout
+# Stop and delete everything
 docker-compose down -v --remove-orphans
 
-# Supprimer les images
+# Delete images
 docker-compose down --rmi all
 
-# Nettoyer le système Docker
+# Clean up the Docker system
 docker system prune -f
 
-echo "✅ Nettoyage terminé"
+echo " Cleaning completed"

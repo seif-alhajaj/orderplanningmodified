@@ -15,23 +15,22 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // URLs autorisées pour votre frontend
+      // Authorized URLs for your frontend
         config.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:*",     // Tous les ports localhost
-                "http://127.0.0.1:*",     // Tous les ports 127.0.0.1
-                "https://localhost:*"     // HTTPS localhost si besoin
+                "http://localhost:*",   // All localhost ports
+                "http://127.0.0.1:*",     // All ports 127.0.0.1
+                "https://localhost:*"    // HTTPS localhost if needed
         ));
 
-        // Méthodes HTTP autorisées
+      // Allowed HTTP methods
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // Headers autorisés
+       // Authorized headers
         config.setAllowedHeaders(Arrays.asList("*"));
-
-        // Pas de credentials pour simplifier
+       // No credentials to simplify
         config.setAllowCredentials(false);
 
-        // Cache preflight requests
+      // Cache preflight requests
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

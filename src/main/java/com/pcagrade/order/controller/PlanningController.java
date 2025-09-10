@@ -31,20 +31,19 @@ public class PlanningController {
     private EmployeeService employeeService;
 
     @Autowired
-    private PlanningService planningService; // Utilise le service existant
-
+    private PlanningService planningService; //Use existing service
     @Autowired
     private GreedyPlanningService greedyPlanningService; // Alternative
 
     /**
-     * 🎯 ENDPOINT PRINCIPAL - Utilise PlanningService existant
+     *  ENDPOINT PRINCIPAL - Utilise PlanningService existant
      */
     @PostMapping("/generate")
     public ResponseEntity<Map<String, Object>> generatePlanning(@RequestBody Map<String, Object> request) {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            log.info("🎯 FINAL WORKING PLANNING GENERATION");
+            log.info(" FINAL WORKING PLANNING GENERATION");
 
             // ========== PARAMETERS ==========
             String startDate = (String) request.getOrDefault("startDate", "2025-07-01");
@@ -52,7 +51,7 @@ public class PlanningController {
                     Integer.valueOf(request.get("timePerCard").toString()) : 3;
             Boolean cleanFirst = (Boolean) request.getOrDefault("cleanFirst", false);
 
-            log.info("🎯 Config: startDate={}, timePerCard={}, cleanFirst={}",
+            log.info(" Config: startDate={}, timePerCard={}, cleanFirst={}",
                     startDate, timePerCard, cleanFirst);
 
             // ========== AGGRESSIVE CLEAN ==========
@@ -69,7 +68,7 @@ public class PlanningController {
                         try {
                             Query deleteQ = entityManager.createNativeQuery(deleteQuery);
                             deletedCount += deleteQ.executeUpdate();
-                            log.info("🧹 Delete query '{}' removed {} rows", deleteQuery, deletedCount);
+                            log.info(" Delete query '{}' removed {} rows", deleteQuery, deletedCount);
                             break; // Stop after first successful delete
                         } catch (Exception e) {
                             log.warn("Delete query '{}' failed: {}", deleteQuery, e.getMessage());
@@ -79,10 +78,10 @@ public class PlanningController {
                     // Verify clean worked
                     Query countQ = entityManager.createNativeQuery("SELECT COUNT(*) FROM j_planning");
                     Number remaining = (Number) countQ.getSingleResult();
-                    log.info("🔍 After clean: {} plannings remaining", remaining.intValue());
+                    log.info(" After clean: {} plannings remaining", remaining.intValue());
 
                 } catch (Exception cleanError) {
-                    log.error("❌ All clean attempts failed: {}", cleanError.getMessage());
+                    log.error(" All clean attempts failed: {}", cleanError.getMessage());
                 }
             }
 
@@ -111,7 +110,7 @@ public class PlanningController {
             @SuppressWarnings("unchecked")
             List<Object[]> orderResults = query.getResultList();
 
-            log.info("📦 Found {} orders total from date {}", orderResults.size(), startDate);
+            log.info(" Found {} orders total from date {}", orderResults.size(), startDate);
 
             if (orderResults.isEmpty()) {
                 result.put("success", false);
@@ -168,7 +167,7 @@ public class PlanningController {
                         planning.put("status", "BASIC_SAVED");
 
                         savedPlannings.add(planning);
-                        log.info("✅ BASIC SAVE #{}: Order {} -> Employee {}",
+                        log.info("BASIC SAVE #{}: Order {} -> Employee {}",
                                 successCount, orderNumber, employeeName);
                     }
 
@@ -176,7 +175,7 @@ public class PlanningController {
                     String error = String.format("Order %s failed: %s",
                             orderResults.get(i)[1], orderError.getMessage());
                     saveErrors.add(error);
-                    log.error("❌ {}", error);
+                    log.error(" {}", error);
                 }
             }
 
@@ -206,11 +205,11 @@ public class PlanningController {
                     int rowsUpdated = updateQ.executeUpdate();
                     if (rowsUpdated > 0) {
                         savedPlanning.put("status", "FULLY_CONFIGURED");
-                        log.info("✅ Enhanced save for planning {}", planningId);
+                        log.info(" Enhanced save for planning {}", planningId);
                     }
 
                 } catch (Exception updateError) {
-                    log.warn("⚠️ Enhancement failed for planning: {}", updateError.getMessage());
+                    log.warn(" Enhancement failed for planning: {}", updateError.getMessage());
                 }
             }
 
@@ -222,8 +221,8 @@ public class PlanningController {
             boolean hasSuccess = successCount > 0;
             result.put("success", hasSuccess);
             result.put("message", hasSuccess ?
-                    String.format("✅ SUCCESS: %d plannings saved to database!", successCount) :
-                    "❌ No plannings could be saved - see errors");
+                    String.format(" SUCCESS: %d plannings saved to database!", successCount) :
+                    " No plannings could be saved - see errors");
             result.put("processedOrders", successCount);
             result.put("totalOrdersAnalyzed", orderResults.size());
             result.put("activeEmployees", employees.size());
@@ -239,13 +238,13 @@ public class PlanningController {
                 result.put("errors", saveErrors);
             }
 
-            log.info("🎉 FINAL RESULT: {} plannings saved, {} total in DB",
+            log.info(" FINAL RESULT: {} plannings saved, {} total in DB",
                     successCount, totalPlannings.intValue());
 
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
-            log.error("❌ Final planning generation failed: {}", e.getMessage(), e);
+            log.error(" Final planning generation failed: {}", e.getMessage(), e);
 
             result.put("success", false);
             result.put("message", "Final generation failed: " + e.getMessage());
@@ -258,7 +257,7 @@ public class PlanningController {
     }
 
     /**
-     * 🔍 DIAGNOSTIC - Analyser les services disponibles
+     *  DIAGNOSIS - Analyze available services
      */
     @GetMapping("/debug")
     public ResponseEntity<Map<String, Object>> debugPlanning(
@@ -267,7 +266,7 @@ public class PlanningController {
         Map<String, Object> debug = new HashMap<>();
 
         try {
-            log.info("🔍 DIAGNOSTIC - Services and data analysis");
+            log.info(" DIAGNOSTIC - Services and data analysis");
 
             // ========== CHECK EMPLOYEES ==========
             List<Map<String, Object>> employees = employeeService.getAllActiveEmployees();
@@ -280,7 +279,7 @@ public class PlanningController {
                     HEX(o.id) as orderId,
                     o.num_commande as orderNumber,
                     o.date as orderDate,
-                    COALESCE(o.priority, 'MEDIUM') as priority,
+                    COALESCE(o.priority, 'FAST') as priority,
                     COALESCE(o.status, 1) as status
                 FROM `order` o
                 WHERE o.date >= ?
@@ -328,18 +327,18 @@ public class PlanningController {
 
             List<String> recommendations = new ArrayList<>();
             if (orderResults.isEmpty()) {
-                recommendations.add("❌ No orders found from date " + startDate);
+                recommendations.add(" No orders found from date " + startDate);
             } else if (employees.isEmpty()) {
-                recommendations.add("❌ No employees available");
+                recommendations.add(" No employees available");
             } else {
-                recommendations.add("✅ " + orderResults.size() + " orders and " + employees.size() + " employees available");
+                recommendations.add(" " + orderResults.size() + " orders and " + employees.size() + " employees available");
             }
             debug.put("recommendations", recommendations);
 
             return ResponseEntity.ok(debug);
 
         } catch (Exception e) {
-            log.error("❌ Debug failed: {}", e.getMessage(), e);
+            log.error(" Debug failed: {}", e.getMessage(), e);
             debug.put("success", false);
             debug.put("error", e.getMessage());
             return ResponseEntity.ok(debug);
@@ -347,12 +346,12 @@ public class PlanningController {
     }
 
     /**
-     * 📋 GET ALL PLANNINGS - Récupère tous les plannings
+     *  GET ALL PLANNINGS - retrieves all plannings
      */
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllPlannings() {
         try {
-            log.info("📋 Fetching all plannings from j_planning table");
+            log.info(" Fetching all plannings from j_planning table");
 
             String sql = """
                 SELECT 
@@ -416,11 +415,11 @@ public class PlanningController {
             response.put("plannings", plannings);
             response.put("total", plannings.size());
 
-            log.info("✅ Retrieved {} plannings successfully", plannings.size());
+            log.info(" Retrieved {} plannings successfully", plannings.size());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("❌ Error fetching plannings", e);
+            log.error(" Error fetching plannings", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -429,8 +428,8 @@ public class PlanningController {
     }
 
     /**
-     * 👥 GET EMPLOYEE PLANNINGS - Plannings d'un employé spécifique
-     * GET EMPLOYEE PLANNINGS - Compatible with unified algorithm
+     *  GET EMPLOYEE SCHEDULES - Schedules for a specific employee
+* GET EMPLOYEE SCHEDULES - Compatible with unified algorithm
      */
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<Map<String, Object>> getEmployeePlannings(
@@ -517,7 +516,7 @@ public class PlanningController {
                 order.put("durationMinutes", duration);
                 order.put("estimatedDuration", duration);
 
-                order.put("priority", row[6] != null ? row[6].toString() : "MEDIUM");
+                order.put("priority", row[6] != null ? row[6].toString() : "FAST");
                 order.put("status", row[7] != null ? row[7].toString() : "SCHEDULED");
 
                 // Safe conversion for card count
@@ -574,14 +573,14 @@ public class PlanningController {
         }
     }
     /**
-     * 📊 GET EMPLOYEES WITH PLANNING DATA - Employés avec leurs statistiques
+     *  GET EMPLOYEES WITH PLANNING DATA - Employees with their statistics
      */
     @GetMapping("/employees-stats")
     public ResponseEntity<Map<String, Object>> getEmployeesWithPlanningStats(
             @RequestParam(required = false) String date) {
 
         try {
-            log.info("📊 Fetching employees with planning stats for date: {}", date);
+            log.info(" Fetching employees with planning stats for date: {}", date);
 
             String dateFilter = date != null ? " AND p.planning_date = '" + date + "'" : "";
 
@@ -612,18 +611,19 @@ public class PlanningController {
 
             for (Object[] row : results) {
                 Map<String, Object> employee = new HashMap<>();
-                employee.put("id", row[0]);
-                employee.put("name", row[1]);
-                employee.put("firstName", row[2]);
-                employee.put("lastName", row[3]);
-                employee.put("email", row[4]);
-                employee.put("active", row[5]);
-                employee.put("workHoursPerDay", row[6]);
-                employee.put("totalMinutes", row[7]);
-                employee.put("maxMinutes", ((Number) row[6]).intValue() * 60);
-                employee.put("taskCount", row[8]);
-                employee.put("cardCount", row[9]);
-                employee.put("workloadRatio", row[10]);
+                 employee.put("id", row[0]);
+                 employee.put("name", row[1]);
+                 employee.put("firstName", row[2]);
+                 employee.put("lastName", row[3]);
+                 employee.put("email", row[4]);
+                 employee.put("role", row[5]);         // ← ADDED ROLE FIELD
+                 employee.put("active", row[6]);       // active moved to index 6
+                 employee.put("workHoursPerDay", row[7]);  // workHoursPerDay moved to index 7
+                 employee.put("totalMinutes", row[8]);     // totalMinutes moved to index 8
+                 employee.put("maxMinutes", ((Number) row[7]).intValue() * 60);
+                 employee.put("taskCount", row[9]);        // taskCount moved to index 9
+                 employee.put("cardCount", row[10]);       // cardCount moved to index 10
+                 employee.put("workloadRatio", row[11]);   // workloadRatio moved to index 11
 
                 // Status based on workload
                 Double workloadRatio = (Double) row[10];
@@ -647,11 +647,11 @@ public class PlanningController {
             response.put("total", employees.size());
             response.put("date", date != null ? date : "all");
 
-            log.info("✅ Retrieved {} employees with planning stats", employees.size());
+            log.info(" Retrieved {} employees with planning stats", employees.size());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("❌ Error fetching employees with planning stats", e);
+            log.error(" Error fetching employees with planning stats", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -660,13 +660,13 @@ public class PlanningController {
     }
 
     /**
-     * 🗑️ DELETE ALL PLANNINGS - Nettoie la table j_planning
+     *  DELETE ALL PLANNINGS - cleans the table j_planning
      */
     @DeleteMapping("/cleanup")
     @Transactional
     public ResponseEntity<Map<String, Object>> cleanupPlannings() {
         try {
-            log.info("🗑️ Cleaning up j_planning table");
+            log.info(" Cleaning up j_planning table");
 
             String countSql = "SELECT COUNT(*) FROM j_planning";
             Query countQuery = entityManager.createNativeQuery(countSql);
@@ -682,11 +682,11 @@ public class PlanningController {
             response.put("rowsDeleted", deletedRows);
             response.put("beforeCount", beforeCount.intValue());
 
-            log.info("✅ Deleted {} planning records", deletedRows);
+            log.info(" Deleted {} planning records", deletedRows);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("❌ Error cleaning planning table", e);
+            log.error(" Error cleaning planning table", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -695,12 +695,12 @@ public class PlanningController {
     }
 
     /**
-     * 📈 GET PLANNING STATS - Statistiques globales
+     *  GET PLANNING STATS - Statistiques globales
      */
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getPlanningStats() {
         try {
-            log.info("📈 Fetching planning statistics");
+            log.info(" Fetching planning statistics");
 
             String sql = """
                 SELECT 
@@ -713,7 +713,7 @@ public class PlanningController {
                     COUNT(CASE WHEN status = 'SCHEDULED' THEN 1 END) as scheduled,
                     COUNT(CASE WHEN status = 'IN_PROGRESS' THEN 1 END) as inProgress,
                     COUNT(CASE WHEN status = 'COMPLETED' THEN 1 END) as completed,
-                    COUNT(CASE WHEN priority = 'HIGH' THEN 1 END) as highPriority,
+                    COUNT(CASE WHEN priority = 'FAST_PLUS' THEN 1 END) as highPriority,
                     MIN(planning_date) as earliestDate,
                     MAX(planning_date) as latestDate
                 FROM j_planning
@@ -741,11 +741,11 @@ public class PlanningController {
             response.put("success", true);
             response.put("stats", stats);
 
-            log.info("✅ Planning stats retrieved successfully");
+            log.info(" Planning stats retrieved successfully");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("❌ Error fetching planning stats", e);
+            log.error(" Error fetching planning stats", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -777,12 +777,12 @@ public class PlanningController {
     }
 
     /**
-     * 🎲 GREEDY PLANNING ENDPOINT - Uses GreedyPlanningService
+     *  GREEDY PLANNING ENDPOINT - Uses GreedyPlanningService
      */
     @PostMapping("/greedy")
     public ResponseEntity<Map<String, Object>> executeGreedyPlanning(@RequestBody Map<String, Object> request) {
         try {
-            log.info("🎲 GREEDY PLANNING EXECUTION");
+            log.info(" GREEDY PLANNING EXECUTION");
 
             // ========== PARAMETERS ==========
             Integer day = (Integer) request.getOrDefault("day", 1);
@@ -790,17 +790,17 @@ public class PlanningController {
             Integer year = (Integer) request.getOrDefault("year", 2025);
             Integer timePerCard = (Integer) request.getOrDefault("timePerCard", 3);
 
-            log.info("🎲 Greedy Config: date={}/{}/{}, timePerCard={}", day, month, year, timePerCard);
+            log.info(" Greedy Config: date={}/{}/{}, timePerCard={}", day, month, year, timePerCard);
 
             // ========== CALL GREEDY SERVICE ==========
             Map<String, Object> result = greedyPlanningService.executeGreedyPlanning(day, month, year);
 
-            log.info("✅ Greedy planning result: {}", result);
+            log.info(" Greedy planning result: {}", result);
 
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
-            log.error("❌ Greedy planning failed: {}", e.getMessage(), e);
+            log.error(" Greedy planning failed: {}", e.getMessage(), e);
 
             Map<String, Object> errorResult = new HashMap<>();
             errorResult.put("success", false);
@@ -812,10 +812,10 @@ public class PlanningController {
         }
     }
     /**
-     * 🎲 ULTRA SIMPLE GREEDY PLANNING - Uses existing services only
+     *  ULTRA SIMPLE GREEDY PLANNING - Uses existing services only
      */
     /**
-     * 🎲 ULTRA SIMPLE GREEDY PLANNING - Uses existing services only
+     *  ULTRA SIMPLE GREEDY PLANNING - Uses existing services only
      */
     @PostMapping("/greedy-simple")
     @Transactional
@@ -823,13 +823,13 @@ public class PlanningController {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            log.info("🎲 ULTRA SIMPLE GREEDY PLANNING");
+            log.info(" ULTRA SIMPLE GREEDY PLANNING");
 
             // ========== PARAMETERS ==========
             String startDate = (String) request.getOrDefault("startDate", "2025-06-01");
             Integer timePerCard = (Integer) request.getOrDefault("timePerCard", 3);
 
-            log.info("🎲 Simple Greedy Config: startDate={}, timePerCard={}", startDate, timePerCard);
+            log.info(" Simple Greedy Config: startDate={}, timePerCard={}", startDate, timePerCard);
 
             // ========== USE EXISTING WORKING QUERIES FROM DEBUG ENDPOINT ==========
 
@@ -840,7 +840,7 @@ public class PlanningController {
                 result.put("message", "No active employees found");
                 return ResponseEntity.ok(result);
             }
-            log.info("✅ Found {} active employees", employees.size());
+            log.info(" Found {} active employees", employees.size());
 
             // 2. Get orders using the real database structure with card count
             String orderQuery = """
@@ -848,7 +848,7 @@ public class PlanningController {
                 HEX(o.id) as orderId,
                 o.num_commande as orderNumber,
                 o.date as orderDate,
-                COALESCE(o.priority, 'MEDIUM') as priority,
+                COALESCE(o.priority, 'FAST') as priority,
                 COALESCE(o.status, 1) as status,
                 (SELECT COUNT(*) 
                  FROM card_certification_order cco 
@@ -869,7 +869,7 @@ public class PlanningController {
                 result.put("plannings", new ArrayList<>());
                 return ResponseEntity.ok(result);
             }
-            log.info("✅ Found {} orders to plan", orderResults.size());
+            log.info(" Found {} orders to plan", orderResults.size());
 
             // 3. Simple planning assignment - one order per employee, round-robin
             List<Map<String, Object>> createdPlannings = new ArrayList<>();
@@ -936,11 +936,11 @@ public class PlanningController {
                         planning.put("status", "PLANNED");
 
                         createdPlannings.add(planning);
-                        log.info("✅ Simple Planning #{}: Order {} -> Employee {}", successCount, orderNumber, employeeName);
+                        log.info(" Simple Planning #{}: Order {} -> Employee {}", successCount, orderNumber, employeeName);
                     }
 
                 } catch (Exception orderError) {
-                    log.warn("⚠️ Failed to plan order {}: {}", i, orderError.getMessage());
+                    log.warn(" Failed to plan order {}: {}", i, orderError.getMessage());
                     // Continue with next order
                 }
             }
@@ -950,18 +950,18 @@ public class PlanningController {
 
             // ========== RESULT ==========
             result.put("success", true);
-            result.put("message", String.format("✅ ULTRA SIMPLE SUCCESS: %d plannings created", successCount));
+            result.put("message", String.format(" ULTRA SIMPLE SUCCESS: %d plannings created", successCount));
             result.put("plannings", createdPlannings);
             result.put("planningsCount", successCount);
             result.put("ordersAnalyzed", orderResults.size());
             result.put("employeesUsed", employees.size());
             result.put("algorithm", "ULTRA_SIMPLE");
 
-            log.info("🎉 ULTRA SIMPLE SUCCESS: {} plannings created from {} orders", successCount, orderResults.size());
+            log.info(" ULTRA SIMPLE SUCCESS: {} plannings created from {} orders", successCount, orderResults.size());
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
-            log.error("❌ Ultra simple planning failed: {}", e.getMessage(), e);
+            log.error(" Ultra simple planning failed: {}", e.getMessage(), e);
 
             result.put("success", false);
             result.put("message", "Ultra simple planning failed: " + e.getMessage());
@@ -973,10 +973,10 @@ public class PlanningController {
     }
 
     /**
-     * 👥 GENERATE UNIFIED PLANNING - Uses same algorithm as Global Planning
+     *  GENERATE UNIFIED PLANNING - Uses same algorithm as Global Planning
      */
     /**
-     * 👥 GENERATE UNIFIED PLANNING - Uses same algorithm as Global Planning
+     *  GENERATE UNIFIED PLANNING - Uses same algorithm as Global Planning
      */
     @PostMapping("/generate-unified")
     @Transactional
@@ -984,14 +984,14 @@ public class PlanningController {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            log.info("👥 UNIFIED PLANNING GENERATION - Using Global Planning Algorithm");
+            log.info(" UNIFIED PLANNING GENERATION - Using Global Planning Algorithm");
 
             String startDate = (String) request.getOrDefault("startDate", "2025-06-01"); // t1
             String planningDate = (String) request.getOrDefault("planningDate", LocalDate.now().toString()); // t2
             Integer timePerCard = (Integer) request.getOrDefault("timePerCard", 3);
             Boolean cleanFirst = (Boolean) request.getOrDefault("cleanFirst", true);
 
-            log.info("👥 Config: startDate={} (t1), planningDate={} (t2), timePerCard={}, cleanFirst={}",
+            log.info(" Config: startDate={} (t1), planningDate={} (t2), timePerCard={}, cleanFirst={}",
                     startDate, planningDate, timePerCard, cleanFirst);
 
             // Clean existing plannings for the planning date (t2)
@@ -1000,7 +1000,7 @@ public class PlanningController {
                 Query deleteQ = entityManager.createNativeQuery(deleteSql);
                 deleteQ.setParameter(1, LocalDate.parse(planningDate));
                 int deleted = deleteQ.executeUpdate();
-                log.info("🗑️ Cleaned {} existing plannings for planning date {}", deleted, planningDate);
+                log.info(" Cleaned {} existing plannings for planning date {}", deleted, planningDate);
             }
 
             // Get active employees
@@ -1017,7 +1017,7 @@ public class PlanningController {
                 HEX(o.id) as orderId,
                 o.num_commande as orderNumber,
                 o.date as orderDate,
-                COALESCE(o.priority, 'MEDIUM') as priority,
+                COALESCE(o.priority, 'FAST') as priority,
                 COALESCE(o.status, 1) as status,
                 (SELECT COUNT(*) 
                  FROM card_certification_order cco 
@@ -1039,7 +1039,7 @@ public class PlanningController {
                 return ResponseEntity.ok(result);
             }
 
-            log.info("✅ Found {} orders (from {}) and {} employees", orderResults.size(), startDate, employees.size());
+            log.info(" Found {} orders (from {}) and {} employees", orderResults.size(), startDate, employees.size());
 
             // SAME ALGORITHM AS GLOBAL PLANNING - Round-robin assignment
             List<Map<String, Object>> employeeAssignments = new ArrayList<>();
@@ -1108,7 +1108,7 @@ public class PlanningController {
                     insertQ.setParameter(6, endDateTime);
                     insertQ.setParameter(7, durationMinutes);
                     insertQ.setParameter(8, endDateTime);
-                    insertQ.setParameter(9, "MEDIUM");
+                    insertQ.setParameter(9, "FAST");
                     insertQ.setParameter(10, "SCHEDULED");
                     insertQ.setParameter(11, 0);
                     insertQ.setParameter(12, cardCount);
@@ -1147,12 +1147,12 @@ public class PlanningController {
                             }
                         }
 
-                        log.info("✅ Unified Planning #{}: Order {} (from {}) -> Employee {} (planned for {})",
+                        log.info(" Unified Planning #{}: Order {} (from {}) -> Employee {} (planned for {})",
                                 successCount, orderNumber, orderRow[2], employeeName, planningDate);
                     }
 
                 } catch (Exception orderError) {
-                    log.warn("⚠️ Failed to assign order {}: {}", i, orderError.getMessage());
+                    log.warn(" Failed to assign order {}: {}", i, orderError.getMessage());
                 }
             }
 
@@ -1177,7 +1177,7 @@ public class PlanningController {
             }
 
             result.put("success", true);
-            result.put("message", String.format("✅ UNIFIED SUCCESS: %d orders (from %s) assigned for %s",
+            result.put("message", String.format(" UNIFIED SUCCESS: %d orders (from %s) assigned for %s",
                     successCount, startDate, planningDate));
             result.put("employeeAssignments", employeeAssignments);
             result.put("totalOrdersAssigned", successCount);
@@ -1187,13 +1187,13 @@ public class PlanningController {
             result.put("startDate", startDate); // t1
             result.put("planningDate", planningDate); // t2
 
-            log.info("🎉 UNIFIED SUCCESS: {} orders (from {}) assigned to {} employees (for {})",
+            log.info(" UNIFIED SUCCESS: {} orders (from {}) assigned to {} employees (for {})",
                     successCount, startDate, employees.size(), planningDate);
 
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
-            log.error("❌ Unified planning failed: {}", e.getMessage(), e);
+            log.error(" Unified planning failed: {}", e.getMessage(), e);
 
             result.put("success", false);
             result.put("message", "Unified planning failed: " + e.getMessage());
@@ -1214,7 +1214,7 @@ public class PlanningController {
             case "EXCELSIOR" -> "EXCELSIOR";
             case "FAST_PLUS", "FAST+" -> "FAST+";
             case "FAST" -> "FAST";
-            case "CLASSIC", "MEDIUM", "LOW", "HIGH" -> "CLASSIC";
+            case "CLASSIC" -> "CLASSIC";
             default -> "CLASSIC";
         };
     }

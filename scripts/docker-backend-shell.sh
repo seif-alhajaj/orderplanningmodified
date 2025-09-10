@@ -1,7 +1,7 @@
 # ========== SCRIPT 6: docker-backend-shell.sh ==========
 #!/bin/bash
-echo "🔧 SHELL BACKEND"
+echo " SHELL BACKEND"
 echo "================"
 
-# Accéder au shell du container backend
+# Access the backend container shell
 docker-compose exec backend /bin/sh

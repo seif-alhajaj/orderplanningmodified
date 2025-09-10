@@ -191,7 +191,7 @@ public class Planning extends AbstractUlidEntity {
      * Priority levels for planning entries
      */
     public enum PlanningPriority {
-        EXCELSIORS,  // Previously URGENT
+        EXCELSIOR,  // Previously URGENT
         FAST_PLUS,   // Previously HIGH
         FAST,        // Previously MEDIUM
         CLASSIC      // Previously LOW (and default)

@@ -1,6 +1,6 @@
-// ============= CORRECTIF COMPLET - ABSTRACTULIDENTITY + SERVICES =============
+// ============= COMPLETE FIX - ABSTRACTULIDENTITY + SERVICES =============
 
-// ✅ 1. REMPLACEZ votre AbstractUlidEntity.java ENTIÈREMENT :
+// 1. REPLACE your AbstractUlidEntity.java COMPLETELY:
 
 package com.pcagrade.order.util;
 
@@ -16,7 +16,7 @@ import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 /**
- * ✅ Entité abstraite ULID stocké comme UUID en BINARY(16)
+ * Abstract ULID entity stored as UUID in BINARY(16)
  */
 @Getter
 @Setter
@@ -31,39 +31,39 @@ public abstract class AbstractUlidEntity {
     )
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "BINARY(16)")
     @JdbcTypeCode(SqlTypes.BINARY)
-    private UUID id;  // ✅ UUID au lieu de Ulid
+    private UUID id;  // UUID instead of Ulid
 
     /**
-     * Hook JPA pour s'assurer qu'un ID est généré avant la persistance
+     * JPA hook to ensure an ID is generated before persistence
      */
     @PrePersist
     protected void ensureId() {
         if (this.id == null) {
-            // Générer un ULID et le convertir en UUID
+            // Generate a ULID and convert it to UUID
             Ulid ulid = UlidCreator.getUlid();
             this.id = ulid.toUuid();
-            System.out.println("🆔 Generated ULID: " + ulid + " → UUID: " + this.id);
+            System.out.println("Generated ULID: " + ulid + " → UUID: " + this.id);
         }
     }
 
     /**
-     * Obtient l'ID sous forme de String ULID (reconversion depuis UUID)
+     * Gets the ID as a ULID String (conversion back from UUID)
      */
     @Transient
     public String getUlidString() {
         if (id == null) return null;
         try {
-            // Reconvertir UUID → ULID pour affichage
+            // Convert UUID → ULID for display
             Ulid ulid = Ulid.from(id);
             return ulid.toString();
         } catch (Exception e) {
-            // Si ce n'est pas un ULID valide, retourner l'UUID
+            // If not a valid ULID, return the UUID
             return id.toString();
         }
     }
 
     /**
-     * Obtient le ULID depuis l'UUID stocké
+     * Gets the ULID from the stored UUID
      */
     @Transient
     public Ulid getUlid() {
@@ -76,7 +76,7 @@ public abstract class AbstractUlidEntity {
     }
 
     /**
-     * Obtient l'ID sous forme hexadécimale (pour les requêtes natives)
+     * Gets the ID as hexadecimal (for native queries)
      */
     @Transient
     public String getIdAsHex() {
@@ -85,7 +85,7 @@ public abstract class AbstractUlidEntity {
     }
 
     /**
-     * Définit l'ID depuis un ULID string
+     * Sets the ID from a ULID string
      */
     public void setUlidFromString(String ulidString) {
         if (ulidString == null || ulidString.trim().isEmpty()) {
@@ -97,12 +97,12 @@ public abstract class AbstractUlidEntity {
             Ulid ulid = Ulid.from(ulidString.trim());
             this.id = ulid.toUuid();
         } catch (Exception e) {
-            System.err.println("❌ Erreur conversion ULID string: " + e.getMessage());
-            throw new IllegalArgumentException("ULID invalide: " + ulidString, e);
+            System.err.println("ULID string conversion error: " + e.getMessage());
+            throw new IllegalArgumentException("Invalid ULID: " + ulidString, e);
         }
     }
 
-    // Méthodes standard
+    // Standard methods
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

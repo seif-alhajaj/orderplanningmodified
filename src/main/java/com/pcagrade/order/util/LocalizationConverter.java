@@ -11,7 +11,7 @@ public class LocalizationConverter implements AttributeConverter<Localization, S
         if (localization == null) {
             return null;
         }
-        // Stocke le code court (us, fr, de, etc.) au lieu du nom (USA, FRANCE, GERMANY)
+       // Stores the short code (us, fr, de, etc.) instead of the name (USA, FRANCE, GERMANY)
         return localization.getCode();
     }
 

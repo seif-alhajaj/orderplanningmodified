@@ -4,7 +4,7 @@
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">📅 Planning Management</h1>
+          <h1 class="text-2xl font-bold text-gray-900"> Planning Management</h1>
           <p class="text-gray-600 mt-1">Generate and manage work assignments for Pokemon card orders</p>
         </div>
         <div class="flex space-x-3">
@@ -12,14 +12,14 @@
             @click="testPlanningEndpoints"
             class="btn-secondary"
           >
-            🔍 Debug API
+             Debug API
           </button>
           <button
             @click="refreshData"
             :disabled="loading"
             class="btn-primary"
           >
-            {{ loading ? '⏳ Loading...' : '🔄 Refresh' }}
+            {{ loading ? ' Loading...' : ' Refresh' }}
           </button>
         </div>
       </div>
@@ -80,7 +80,7 @@
             <p class="text-sm text-gray-600">Total Plannings</p>
             <p class="text-2xl font-semibold text-gray-900">{{ plannings.length }}</p>
             <p v-if="duplicateStats.totalDuplicates > 0" class="text-xs text-red-600">
-              ⚠️ {{ duplicateStats.totalDuplicates }} duplicates
+               {{ duplicateStats.totalDuplicates }} duplicates
             </p>
           </div>
         </div>
@@ -102,7 +102,7 @@
             :min="'2025-01-01'"
           >
           <p class="text-xs text-gray-500 mt-1">
-            📦 All orders from this date onwards will be planned (Currently: ~50 orders from June 1st, 2025)
+             All orders from this date onwards will be planned (Currently: ~50 orders from June 1st, 2025)
           </p>
         </div>
         <div>
@@ -119,7 +119,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Priority Mode</label>
           <select v-model="config.priorityMode" class="input-field">
-            <option value="excelsiors">Excelsiors First</option>
+            <option value="excelsior">Excelsior First</option>
             <option value="balanced">Balanced</option>
             <option value="efficiency">Efficiency First</option>
           </select>
@@ -153,23 +153,23 @@
           :disabled="generating"
           class="btn-primary"
         >
-          {{ generating ? '⏳ Generating...' : '🚀 Generate Planning' }}
+          {{ generating ? ' Generating...' : ' Generate Planning' }}
         </button>
 
-        <!-- AJOUTEZ CES NOUVEAUX BOUTONS ICI -->
+        <!-- ADD THESE NEW BUTTONS HERE -->
         <button
           @click="generatePlanningWithGreedy"
           :disabled="generating"
           class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
         >
-          {{ generating ? '⏳ Generating...' : '🎲 Try Greedy Algorithm' }}
+          {{ generating ? ' Generating...' : ' Try Greedy Algorithm' }}
         </button>
 
         <button
           @click="debugPlanningGeneration"
           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
-          🔍 Debug Planning
+           Debug Planning
         </button>
 
         <button
@@ -177,19 +177,19 @@
           :disabled="optimizing"
           class="btn-secondary"
         >
-          {{ optimizing ? '⏳ Optimizing...' : '⚡ Optimize Planning' }}
+          {{ optimizing ? ' Optimizing...' : ' Optimize Planning' }}
         </button>
         <button
           @click="cleanupData"
           class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
         >
-          🗑️ Clean Up
+           Clean Up
         </button>
         <button
           @click="removeDuplicates"
           class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
         >
-          🧹 Remove Duplicates
+           Remove Duplicates
         </button>
       </div>
     </div>
@@ -232,7 +232,7 @@
               <div class="text-sm font-medium text-gray-900">
                 {{ planning.orderNumber || `Order ${planning.orderId}` }}
                 <span v-if="planning.isDuplicate" class="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
-                    ⚠️ Duplicate ({{ planning.duplicateCount }})
+                     Duplicate ({{ planning.duplicateCount }})
                   </span>
               </div>
               <div class="text-sm text-gray-500">{{ planning.cardCount || 0 }} cards</div>
@@ -285,7 +285,7 @@
         @click="generatePlanning"
         class="btn-primary"
       >
-        🚀 Generate First Planning
+         Generate First Planning
       </button>
     </div>
 
@@ -305,7 +305,7 @@ import { ref, computed, onMounted } from 'vue'
 const CARD_PROCESSING_TIME = parseInt(import.meta.env.VITE_CARD_PROCESSING_TIME || '3') // minutes per card
 const DEFAULT_WORK_HOURS = parseInt(import.meta.env.VITE_DEFAULT_WORK_HOURS || '8') // hours per day
 
-console.log(`⚙️ Configuration: ${CARD_PROCESSING_TIME}min per card, ${DEFAULT_WORK_HOURS}h per day`)
+console.log(` Configuration: ${CARD_PROCESSING_TIME}min per card, ${DEFAULT_WORK_HOURS}h per day`)
 
 // ========== INTERFACES ==========
 interface Planning {
@@ -342,7 +342,7 @@ const loadingMessage = ref('')
 const plannings = ref<Planning[]>([])
 
 const config = ref<PlanningConfig>({
-  startDate: '2025-06-01', // ✅ Default: June 1st, 2025
+  startDate: '2025-06-01', //  Default: June 1st, 2025
   cardProcessingTime: CARD_PROCESSING_TIME,
   priorityMode: 'excelsior',
   redistributeOverload: true,
@@ -417,7 +417,7 @@ const groupedPlannings = computed(() => {
 
 // ========== METHODS ==========
 function getNextBusinessDay(): string {
-  // Par défaut, utiliser le 1er juin 2025
+ // By default, use June 1, 2025
   return '2025-06-01'
 }
 
@@ -442,7 +442,7 @@ const loadStats = async () => {
         const response = await fetch(endpoint)
         if (response.ok) {
           const data = await response.json()
-          console.log(`✅ Stats loaded from ${endpoint}:`, data)
+          console.log(` Stats loaded from ${endpoint}:`, data)
 
           stats.value = {
             totalOrders: data.totalCommandes || data.totalOrders || 0,
@@ -454,12 +454,12 @@ const loadStats = async () => {
           break
         }
       } catch (error) {
-        console.warn(`⚠️ ${endpoint} failed:`, error)
+        console.warn(` ${endpoint} failed:`, error)
         continue
       }
     }
   } catch (error) {
-    console.error('❌ Error loading stats:', error)
+    console.error(' Error loading stats:', error)
   }
 }
 
@@ -477,33 +477,33 @@ const loadPlannings = async () => {
 
     for (const endpoint of endpoints) {
       try {
-        console.log('🔄 Trying plannings endpoint:', endpoint)
+        console.log(' Trying plannings endpoint:', endpoint)
         const response = await fetch(endpoint)
 
         if (response.ok) {
           const data = await response.json()
-          console.log(`✅ Plannings loaded from ${endpoint}:`, data)
+          console.log(` Plannings loaded from ${endpoint}:`, data)
 
           // Handle different response formats
           rawPlannings = data.plannings || data.data || data || []
           break
         } else {
-          console.log(`❌ Failed to load from ${endpoint}: ${response.status}`)
+          console.log(` Failed to load from ${endpoint}: ${response.status}`)
         }
       } catch (error) {
-        console.log(`❌ Error with endpoint ${endpoint}:`, error)
+        console.log(` Error with endpoint ${endpoint}:`, error)
         continue
       }
     }
 
     if (rawPlannings.length === 0) {
-      console.warn('⚠️ No raw plannings data found')
+      console.warn(' No raw plannings data found')
       plannings.value = []
       showNotification('No plannings found', 'info')
       return
     }
 
-    console.log(`📊 Raw plannings data (first 3):`, rawPlannings.slice(0, 3))
+    console.log(` Raw plannings data (first 3):`, rawPlannings.slice(0, 3))
 
     // Map raw data to Planning objects with detailed logging
     const mappedPlannings = rawPlannings.map((rawPlanning, index) => {
@@ -511,7 +511,7 @@ const loadPlannings = async () => {
 
       // Log first few mappings for debugging
       if (index < 3) {
-        console.log(`🔍 Mapping planning ${index}:`, {
+        console.log(` Mapping planning ${index}:`, {
           raw: rawPlanning,
           mapped: {
             id: mapped.id,
@@ -549,7 +549,7 @@ const loadPlannings = async () => {
           duplicateInfo.push({ key: uniqueKey, count: 2 })
         }
 
-        console.warn(`🔄 Duplicate planning detected:`, {
+        console.warn(` Duplicate planning detected:`, {
           key: uniqueKey,
           orderNumber: planning.orderNumber,
           employeeName: planning.employeeName,
@@ -562,7 +562,7 @@ const loadPlannings = async () => {
     }
 
     // Log filtering summary
-    console.log(`🎯 Filtering summary:`)
+    console.log(` Filtering summary:`)
     console.log(`  Raw plannings: ${rawPlannings.length}`)
     console.log(`  After mapping: ${mappedPlannings.length}`)
     console.log(`  After deduplication: ${uniquePlannings.length}`)
@@ -574,20 +574,20 @@ const loadPlannings = async () => {
 
     // If all plannings were filtered out, there's likely an issue with the mapping
     if (rawPlannings.length > 0 && uniquePlannings.length === 0) {
-      console.error('❌ ALL PLANNINGS FILTERED OUT - LIKELY MAPPING ISSUE')
+      console.error('ALL PLANNINGS FILTERED OUT - LIKELY MAPPING ISSUE')
       console.error('Sample raw planning data:', rawPlannings[0])
       console.error('Sample mapped planning:', mappedPlannings[0])
 
       // Emergency fallback - show plannings without deduplication
-      console.warn('🚨 Emergency fallback: showing all plannings without deduplication')
+      console.warn(' Emergency fallback: showing all plannings without deduplication')
       plannings.value = mappedPlannings
-      showNotification(`⚠️ Loaded ${mappedPlannings.length} plannings (deduplication disabled due to mapping issues)`, 'warning')
+      showNotification(` Loaded ${mappedPlannings.length} plannings (deduplication disabled due to mapping issues)`, 'warning')
       return
     }
 
     plannings.value = uniquePlannings
 
-    console.log(`🎯 Final plannings: ${rawPlannings.length} raw → ${uniquePlannings.length} unique`)
+    console.log(` Final plannings: ${rawPlannings.length} raw → ${uniquePlannings.length} unique`)
 
     if (rawPlannings.length !== uniquePlannings.length) {
       const duplicatesRemoved = rawPlannings.length - uniquePlannings.length
@@ -597,7 +597,7 @@ const loadPlannings = async () => {
     }
 
   } catch (error) {
-    console.error('❌ Error loading plannings:', error)
+    console.error(' Error loading plannings:', error)
     showNotification('Error loading plannings', 'error')
   } finally {
     loading.value = false
@@ -605,10 +605,10 @@ const loadPlannings = async () => {
   }
 }
 
-// Remplacez la fonction mapPlanning dans Planning.vue par cette version avec debug
+// Replace the mapPlanning function in Planning.vue with this debug version
 
 const mapPlanning = (planningData: any): Planning => {
-  console.log('🔍 Raw planning data:', planningData)
+  console.log(' Raw planning data:', planningData)
 
   // Calculate card count and duration
   const cardCount = planningData.cardCount || planningData.nombreCartes || planningData.cards_count || 0
@@ -625,13 +625,13 @@ const mapPlanning = (planningData: any): Planning => {
     endTime: planningData.endTime || planningData.heureFin || planningData.heure_fin || calculateEndTime(planningData.startTime || '09:00', calculatedDuration),
     durationMinutes: calculatedDuration,
     cardCount,
-    priority: planningData.priority || planningData.priorite || 'MEDIUM',
+    priority: planningData.priority || planningData.priorite || 'FAST',
     status: planningData.status || planningData.statut || 'PENDING',
     completed: planningData.completed || planningData.terminee || false,
     notes: planningData.notes || `${cardCount} cards × ${CARD_PROCESSING_TIME}min = ${calculatedDuration}min`
   }
 
-  console.log('✅ Mapped planning:', {
+  console.log(' Mapped planning:', {
     id: mapped.id,
     orderId: mapped.orderId,
     employeeId: mapped.employeeId,
@@ -670,7 +670,7 @@ const generatePlanning = async () => {
   loadingMessage.value = 'Generating planning for all orders from selected date...'
 
   try {
-    console.log('🚀 Starting planning generation with config:', config.value)
+    console.log(' Starting planning generation with config:', config.value)
 
     const planningConfig = {
       startDate: config.value.startDate,
@@ -680,7 +680,7 @@ const generatePlanning = async () => {
       planAllOrders: true
     }
 
-    console.log('📋 Sending request to /api/planning/generate with:', planningConfig)
+    console.log(' Sending request to /api/planning/generate with:', planningConfig)
 
     const response = await fetch('http://localhost:8080/api/planning/generate', {
       method: 'POST',
@@ -688,53 +688,53 @@ const generatePlanning = async () => {
       body: JSON.stringify(planningConfig)
     })
 
-    console.log('📡 Response status:', response.status, response.statusText)
+    console.log(' Response status:', response.status, response.statusText)
 
     if (response.ok) {
       const result = await response.json()
-      console.log('✅ Full planning generation result:', result)
+      console.log(' Full planning generation result:', result)
 
-      // ✅ CORRECT PROPERTY NAMES FROM BACKEND
+      // CORRECT PROPERTY NAMES FROM BACKEND
       const ordersAnalyzed = result.totalOrdersAnalyzed || result.ordersAnalyzed || 0
       const planningsCreated = result.planningsCreated || result.processedOrders || 0
       const employeesUsed = result.activeEmployees || result.employeesUsed || 0
       const success = result.success !== false // Default to true unless explicitly false
 
-      console.log(`📊 PARSED PLANNING SUMMARY:`)
-      console.log(`  📦 Orders analyzed: ${ordersAnalyzed}`)
-      console.log(`  ✅ Plannings created: ${planningsCreated}`)
-      console.log(`  👥 Employees available: ${employeesUsed}`)
-      console.log(`  ✅ Success flag: ${success}`)
+      console.log(` PARSED PLANNING SUMMARY:`)
+      console.log(` Orders analyzed: ${ordersAnalyzed}`)
+      console.log(` Plannings created: ${planningsCreated}`)
+      console.log(` Employees available: ${employeesUsed}`)
+      console.log(` Success flag: ${success}`)
 
       // Show distribution per employee if available
       if (result.distributionSummary) {
-        console.log(`📋 Distribution per employee:`)
+        console.log(` Distribution per employee:`)
         Object.entries(result.distributionSummary).forEach(([name, count]) => {
           console.log(`  ${name}: ${count} orders`)
         })
       }
 
-      // ✅ IMPROVED SUCCESS/FAILURE DETECTION
+      //  IMPROVED SUCCESS/FAILURE DETECTION
       if (success && (planningsCreated > 0 || result.message?.includes('SUCCESS'))) {
         showNotification(
-          `✅ SUCCESS! ${planningsCreated} plannings created from ${ordersAnalyzed} orders analyzed (${employeesUsed} employees available)`,
+          ` SUCCESS! ${planningsCreated} plannings created from ${ordersAnalyzed} orders analyzed (${employeesUsed} employees available)`,
           'success'
         )
       } else if (success && planningsCreated === 0 && ordersAnalyzed === 0) {
         showNotification(
-          `⚠️ No orders found to plan from date ${config.value.startDate}. Try selecting an earlier date or check if orders exist in the database.`,
+          ` No orders found to plan from date ${config.value.startDate}. Try selecting an earlier date or check if orders exist in the database.`,
           'warning'
         )
       } else if (success && planningsCreated === 0 && ordersAnalyzed > 0) {
         showNotification(
-          `⚠️ Found ${ordersAnalyzed} orders but no plannings were created. Orders may already be planned or there might be an issue with the planning algorithm.`,
+          ` Found ${ordersAnalyzed} orders but no plannings were created. Orders may already be planned or there might be an issue with the planning algorithm.`,
           'warning'
         )
       } else {
         // Show error with backend message
         const errorMessage = result.message || result.detailedError || 'Unknown error occurred'
         showNotification(
-          `❌ Planning failed: ${errorMessage}`,
+          ` Planning failed: ${errorMessage}`,
           'error'
         )
       }
@@ -752,15 +752,15 @@ const generatePlanning = async () => {
         errorText = await response.text() || `HTTP ${response.status}`
       }
 
-      console.error('❌ Planning generation HTTP error:', response.status, errorText)
+      console.error(' Planning generation HTTP error:', response.status, errorText)
       showNotification(
-        `❌ Server Error (${response.status}): ${errorText}`,
+        ` Server Error (${response.status}): ${errorText}`,
         'error'
       )
     }
 
   } catch (error) {
-    console.error('❌ Planning generation exception:', error)
+    console.error(' Planning generation exception:', error)
 
     // Improved error message
     let errorMessage = 'Network or parsing error'
@@ -771,7 +771,7 @@ const generatePlanning = async () => {
     }
 
     showNotification(
-      `❌ Error: ${errorMessage}`,
+      ` Error: ${errorMessage}`,
       'error'
     )
   } finally {
@@ -788,7 +788,7 @@ const optimizePlanning = async () => {
     await loadPlannings()
     showNotification('Planning optimization completed', 'success')
   } catch (error) {
-    console.error('❌ Error optimizing planning:', error)
+    console.error(' Error optimizing planning:', error)
     showNotification('Error optimizing planning', 'error')
   } finally {
     optimizing.value = false
@@ -823,16 +823,16 @@ const removeDuplicates = async () => {
         await fetch('http://localhost:8080/api/planning/remove-duplicates', {
           method: 'POST'
         })
-        console.log('✅ Backend duplicates cleanup requested')
+        console.log(' Backend duplicates cleanup requested')
       } catch (backendError) {
-        console.warn('⚠️ Backend duplicate cleanup failed:', backendError)
+        console.warn(' Backend duplicate cleanup failed:', backendError)
       }
     } else {
       showNotification('No duplicates found', 'success')
     }
 
   } catch (error) {
-    console.error('❌ Error removing duplicates:', error)
+    console.error(' Error removing duplicates:', error)
     showNotification('Error removing duplicates', 'error')
   }
 }
@@ -855,14 +855,14 @@ const cleanupData = async () => {
       throw new Error(`HTTP ${response.status}`)
     }
   } catch (error) {
-    console.error('❌ Error cleaning up data:', error)
+    console.error(' Error cleaning up data:', error)
     showNotification('Error cleaning up data', 'error')
   }
 }
 
 // Debug function to test all planning endpoints
 const testPlanningEndpoints = async () => {
-  console.log('🔍 === TESTING PLANNING ENDPOINTS ===')
+  console.log(' === TESTING PLANNING ENDPOINTS ===')
 
   const endpoints = [
     { name: 'view-simple', url: 'http://localhost:8080/api/planning/view-simple' },
@@ -872,30 +872,30 @@ const testPlanningEndpoints = async () => {
 
   for (const endpoint of endpoints) {
     try {
-      console.log(`🔄 Testing: ${endpoint.url}`)
+      console.log(` Testing: ${endpoint.url}`)
       const response = await fetch(endpoint.url)
 
       if (response.ok) {
         const data = await response.json()
-        console.log(`✅ ${endpoint.name} - SUCCESS:`, data)
+        console.log(` ${endpoint.name} - SUCCESS:`, data)
 
         if (Array.isArray(data)) {
-          console.log(`  📊 Array with ${data.length} items`)
+          console.log(`   Array with ${data.length} items`)
           if (data.length > 0) {
-            console.log(`  📋 First item structure:`, Object.keys(data[0]))
+            console.log(`   First item structure:`, Object.keys(data[0]))
           }
         } else if (typeof data === 'object') {
-          console.log(`  📊 Object with keys:`, Object.keys(data))
+          console.log(`   Object with keys:`, Object.keys(data))
         }
       } else {
-        console.log(`❌ ${endpoint.name} - FAILED: ${response.status}`)
+        console.log(` ${endpoint.name} - FAILED: ${response.status}`)
       }
     } catch (error) {
-      console.log(`❌ ${endpoint.name} - ERROR:`, error.message)
+      console.log(` ${endpoint.name} - ERROR:`, error.message)
     }
   }
 
-  console.log('🏁 === ENDPOINT TESTING COMPLETE ===')
+  console.log(' === ENDPOINT TESTING COMPLETE ===')
   showNotification('Check console for detailed endpoint test results', 'success')
 }
 
@@ -934,13 +934,13 @@ const formatDuration = (minutes: number): string => {
 
 // Simple notification function
 const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-  console.log(`${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'} ${message}`)
+  console.log(`${type === 'success' ? '' : type === 'error' ? '' : 'ℹ'} ${message}`)
   // You can implement a real toast notification here
 }
 
 // ========== LIFECYCLE ==========
 onMounted(() => {
-  console.log('📅 Planning page mounted - Loading data...')
+  console.log(' Planning page mounted - Loading data...')
   refreshData()
 })
 
@@ -948,32 +948,32 @@ onMounted(() => {
 // Ajoutez cette fonction après les autres méthodes comme generatePlanning, loadPlannings, etc.
 const debugPlanningGeneration = async () => {
   try {
-    console.log('🔍 === DEBUGGING PLANNING GENERATION ===')
+    console.log(' === DEBUGGING PLANNING GENERATION ===')
 
     // 1. Test debug endpoint
-    console.log('📊 Step 1: Testing debug endpoint...')
+    console.log('Step 1: Testing debug endpoint...')
     const debugResponse = await fetch('http://localhost:8080/api/planning/debug?startDate=2025-06-01')
     if (debugResponse.ok) {
       const debugData = await debugResponse.json()
-      console.log('✅ Debug endpoint response:', debugData)
+      console.log(' Debug endpoint response:', debugData)
 
       if (debugData.orders && debugData.orders.length > 0) {
-        console.log('📋 Sample orders:', debugData.orders.slice(0, 3))
+        console.log(' Sample orders:', debugData.orders.slice(0, 3))
       }
 
       if (debugData.employees && debugData.employees.length > 0) {
-        console.log('👥 Sample employees:', debugData.employees)
+        console.log('Sample employees:', debugData.employees)
       }
 
     } else {
-      console.error('❌ Debug endpoint failed:', debugResponse.status)
+      console.error(' Debug endpoint failed:', debugResponse.status)
     }
 
-    console.log('🏁 === DEBUG COMPLETE ===')
+    console.log('=== DEBUG COMPLETE ===')
     showNotification('Debug complete - check console for detailed results', 'info')
 
   } catch (error) {
-    console.error('❌ Debug failed:', error)
+    console.error(' Debug failed:', error)
     showNotification('Debug failed - check console for errors', 'error')
   }
 }
@@ -984,30 +984,30 @@ const generatePlanningWithGreedy = async () => {
   loadingMessage.value = 'Generating planning with Greedy algorithm...'
 
   try {
-    console.log('🚀 Using Greedy Planning Service...')
+    console.log(' Using Greedy Planning Service...')
 
-    // Nettoyer d'abord
+    // Clean first
     try {
       const cleanupResponse = await fetch('http://localhost:8080/api/planning/cleanup', {
         method: 'DELETE'
       })
       if (cleanupResponse.ok) {
         const cleanupResult = await cleanupResponse.json()
-        console.log('🗑️ Cleanup successful:', cleanupResult)
+        console.log(' Cleanup successful:', cleanupResult)
       }
     } catch (e) {
-      console.warn('⚠️ Cleanup skipped:', e)
+      console.warn(' Cleanup skipped:', e)
     }
 
-    // Utiliser le service Greedy qui fonctionne mieux
+  // Use the Greedy service which works better
     const currentDate = new Date(config.value.startDate)
     const day = currentDate.getDate()
     const month = currentDate.getMonth() + 1 // JavaScript months are 0-indexed
     const year = currentDate.getFullYear()
 
-    console.log(`📅 Generating for date: ${day}/${month}/${year}`)
+    console.log(` Generating for date: ${day}/${month}/${year}`)
 
-    // Utiliser le nouvel endpoint ultra simple
+  // Use the new ultra-simple endpoint
     const greedyResponse = await fetch('http://localhost:8080/api/planning/greedy-simple', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1019,14 +1019,14 @@ const generatePlanningWithGreedy = async () => {
 
     if (greedyResponse.ok) {
       const result = await greedyResponse.json()
-      console.log('✅ Greedy planning result:', result)
+      console.log(' Greedy planning result:', result)
 
       const planningsCreated = result.planningsCount || result.plannings?.length || 0
       const success = result.success !== false
 
       if (success && planningsCreated > 0) {
         showNotification(
-          `✅ SUCCESS! Created ${planningsCreated} plannings using Greedy algorithm`,
+          `SUCCESS! Created ${planningsCreated} plannings using Greedy algorithm`,
           'success'
         )
       } else {
@@ -1040,7 +1040,7 @@ const generatePlanningWithGreedy = async () => {
 
     } else {
       // Fallback to the other service
-      console.log('⚠️ Greedy failed, trying PlanningService...')
+      console.log(' Greedy failed, trying PlanningService...')
 
       const planningServiceResponse = await fetch('http://localhost:8080/api/planning-service/generate', {
         method: 'POST',
@@ -1054,12 +1054,12 @@ const generatePlanningWithGreedy = async () => {
 
       if (planningServiceResponse.ok) {
         const serviceResult = await planningServiceResponse.json()
-        console.log('✅ PlanningService result:', serviceResult)
+        console.log(' PlanningService result:', serviceResult)
 
         const ordersProcessed = serviceResult.ordersProcessed || 0
         if (ordersProcessed > 0) {
           showNotification(
-            `✅ SUCCESS! Processed ${ordersProcessed} orders with PlanningService`,
+            ` SUCCESS! Processed ${ordersProcessed} orders with PlanningService`,
             'success'
           )
         } else {
@@ -1074,16 +1074,16 @@ const generatePlanningWithGreedy = async () => {
     }
 
   } catch (error) {
-    console.error('❌ Greedy planning error:', error)
-    showNotification(`❌ Error: ${error.message}`, 'error')
+    console.error(' Greedy planning error:', error)
+    showNotification(` Error: ${error.message}`, 'error')
   } finally {
     generating.value = false
     loadingMessage.value = ''
   }
 }
 
-// Remplacer temporairement generatePlanning par cette version
-// ou ajouter un nouveau bouton pour test
+// Temporarily replace generatePlanning with this version
+// or add a new button for testing
 
 </script>
 

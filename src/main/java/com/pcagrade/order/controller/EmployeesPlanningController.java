@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 /**
- * 👥 EMPLOYEES PLANNING CONTROLLER - Version sans conflit
- * Endpoints dédiés au frontend enrichi avec préfixes uniques
+ * EMPLOYEES PLANNING CONTROLLER - Conflict-free version
+ * Endpoints dedicated to the enhanced frontend with unique prefixes
  */
 @RestController
 @RequestMapping("/api/frontend/employees")
@@ -25,12 +25,12 @@ public class EmployeesPlanningController {
     private EntityManager entityManager;
 
     /**
-     * 👥 GET ALL EMPLOYEES - Mode Management
+     * GET ALL EMPLOYEES - Management Mode
      */
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllEmployees() {
         try {
-            log.info("👥 Fetching all employees for management view");
+            log.info("Fetching all employees for management view");
 
             String sql = """
                 SELECT 
@@ -38,6 +38,8 @@ public class EmployeesPlanningController {
                     COALESCE(first_name, 'Unknown') as firstName,
                     COALESCE(last_name, 'User') as lastName,
                     COALESCE(email, 'no-email@example.com') as email,
+                    COALESCE(phone, '') as phone,
+                    COALESCE(role, 'GRADER') as role,
                     COALESCE(active, 1) as active,
                     COALESCE(work_hours_per_day, 8) as workHoursPerDay,
                     creation_date as creationDate,
@@ -54,18 +56,20 @@ public class EmployeesPlanningController {
 
             for (Object[] row : results) {
                 Map<String, Object> employee = new HashMap<>();
-                employee.put("id", row[0]);
-                employee.put("firstName", row[1]);
-                employee.put("lastName", row[2]);
-                employee.put("email", row[3]);
-                employee.put("active", ((Number) row[4]).intValue() == 1);
-                employee.put("workHoursPerDay", row[5]);
-                employee.put("creationDate", row[6]);
-                employee.put("modificationDate", row[7]);
+                employee.put("id", row[0]);           // id
+                employee.put("firstName", row[1]);    // first_name
+                employee.put("lastName", row[2]);     // last_name
+                employee.put("email", row[3]);        // email
+                employee.put("phone", row[4]);        // phone
+                employee.put("role", row[5]);         // role
+                employee.put("active", ((Number) row[6]).intValue() == 1);  // active
+                employee.put("workHoursPerDay", row[7]);  // work_hours_per_day
+                employee.put("creationDate", row[8]);     // creation_date
+                employee.put("modificationDate", row[9]); // modification_date
 
                 // Computed fields
                 employee.put("fullName", row[1] + " " + row[2]);
-                employee.put("status", ((Number) row[4]).intValue() == 1 ? "AVAILABLE" : "INACTIVE");
+                employee.put("status", ((Number) row[6]).intValue() == 1 ? "AVAILABLE" : "INACTIVE");
 
                 employees.add(employee);
             }
@@ -75,11 +79,11 @@ public class EmployeesPlanningController {
             response.put("employees", employees);
             response.put("total", employees.size());
 
-            log.info("✅ Retrieved {} employees", employees.size());
+            log.info("Retrieved {} employees", employees.size());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("❌ Error fetching employees", e);
+            log.error("Error fetching employees", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -88,14 +92,14 @@ public class EmployeesPlanningController {
     }
 
     /**
-     * 📋 GET EMPLOYEES WITH PLANNING DATA - Mode Planning
+     * GET EMPLOYEES WITH PLANNING DATA - Planning Mode
      */
     @GetMapping("/planning-data")
     public ResponseEntity<Map<String, Object>> getEmployeesWithPlanningData(
             @RequestParam(required = false) String date) {
 
         try {
-            log.info("📋 Fetching employees with planning data for date: {}", date);
+            log.info("Fetching employees with planning data for date: {}", date);
 
             String dateFilter = date != null ? " AND p.planning_date = '" + date + "'" : "";
 
@@ -106,6 +110,7 @@ public class EmployeesPlanningController {
                     e.first_name as firstName,
                     e.last_name as lastName,
                     e.email,
+                    COALESCE(e.role, 'GRADER') as role,
                     COALESCE(e.active, 1) as active,
                     COALESCE(e.work_hours_per_day, 8) as workHoursPerDay,
                     COALESCE(SUM(p.estimated_duration_minutes), 0) as totalMinutes,
@@ -114,10 +119,13 @@ public class EmployeesPlanningController {
                     ROUND(
                         COALESCE(SUM(p.estimated_duration_minutes), 0) / 
                         (COALESCE(e.work_hours_per_day, 8) * 60.0), 2
-                    ) as workloadRatio
+                    ) as workloadRatio,
+                    e.creation_date as creationDate,
+                    e.modification_date as modificationDate
                 FROM j_employee e
                 LEFT JOIN j_planning p ON e.id = p.employee_id""" + dateFilter + """
-                GROUP BY e.id, e.first_name, e.last_name, e.email, e.active, e.work_hours_per_day
+                GROUP BY e.id, e.first_name, e.last_name, e.email, e.role, e.active, e.work_hours_per_day, 
+                         e.creation_date, e.modification_date
                 ORDER BY workloadRatio DESC, name ASC
                 """;
 
@@ -129,20 +137,23 @@ public class EmployeesPlanningController {
 
             for (Object[] row : results) {
                 Map<String, Object> employee = new HashMap<>();
-                employee.put("id", row[0]);
-                employee.put("name", row[1]);
-                employee.put("firstName", row[2]);
-                employee.put("lastName", row[3]);
-                employee.put("email", row[4]);
-                employee.put("active", ((Number) row[5]).intValue() == 1);
-                employee.put("workHoursPerDay", row[6]);
-                employee.put("totalMinutes", row[7]);
-                employee.put("maxMinutes", ((Number) row[6]).intValue() * 60);
-                employee.put("taskCount", row[8]);
-                employee.put("cardCount", row[9]);
+                employee.put("id", row[0]);           // id
+                employee.put("name", row[1]);         // computed name
+                employee.put("firstName", row[2]);    // first_name
+                employee.put("lastName", row[3]);     // last_name
+                employee.put("email", row[4]);        // email
+                employee.put("role", row[5]);         // role
+                employee.put("active", ((Number) row[6]).intValue() == 1);  // active
+                employee.put("workHoursPerDay", row[7]);  // work_hours_per_day
+                employee.put("totalMinutes", row[8]);     // total_minutes
+                employee.put("maxMinutes", ((Number) row[7]).intValue() * 60);
+                employee.put("taskCount", row[9]);        // task_count
+                employee.put("cardCount", row[10]);       // card_count
+                employee.put("creationDate", row[12]);    // creation_date
+                employee.put("modificationDate", row[13]);// modification_date
 
                 // Workload calculations
-                Number workloadRatioNum = (Number) row[10];
+                Number workloadRatioNum = (Number) row[11];
                 Double workloadRatio = workloadRatioNum != null ? workloadRatioNum.doubleValue() : 0.0;
                 employee.put("workload", workloadRatio);
 
@@ -164,10 +175,10 @@ public class EmployeesPlanningController {
                 employee.put("available", available);
 
                 // Additional computed fields
-                Integer totalMinutes = ((Number) row[7]).intValue();
+                Integer totalMinutes = ((Number) row[8]).intValue();
                 employee.put("estimatedHours", Math.round(totalMinutes / 60.0 * 100.0) / 100.0);
-                employee.put("totalCards", row[9]);
-                employee.put("activeOrders", row[8]);
+                employee.put("totalCards", row[10]);
+                employee.put("activeOrders", row[9]);
 
                 employees.add(employee);
             }
@@ -178,11 +189,11 @@ public class EmployeesPlanningController {
             response.put("total", employees.size());
             response.put("date", date != null ? date : "all");
 
-            log.info("✅ Retrieved {} employees with planning data", employees.size());
+            log.info("Retrieved {} employees with planning data", employees.size());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("❌ Error fetching employees with planning data", e);
+            log.error("Error fetching employees with planning data", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -191,12 +202,12 @@ public class EmployeesPlanningController {
     }
 
     /**
-     * 👤 GET EMPLOYEE DETAILS - Détail d'un employé spécifique
+     * GET EMPLOYEE DETAILS - Details of a specific employee
      */
     @GetMapping("/{employeeId}")
     public ResponseEntity<Map<String, Object>> getEmployeeDetails(@PathVariable String employeeId) {
         try {
-            log.info("👤 Fetching details for employee: {}", employeeId);
+            log.info("Fetching details for employee: {}", employeeId);
 
             String sql = """
                 SELECT 
@@ -205,6 +216,7 @@ public class EmployeesPlanningController {
                     e.first_name as firstName,
                     e.last_name as lastName,
                     e.email,
+                    COALESCE(e.role, 'GRADER') as role,
                     COALESCE(e.active, 1) as active,
                     COALESCE(e.work_hours_per_day, 8) as workHoursPerDay,
                     e.creation_date as creationDate,
@@ -223,7 +235,7 @@ public class EmployeesPlanningController {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("error", "Employee not found");
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(404).body(errorResponse);
             }
 
             Object[] row = results.get(0);
@@ -233,20 +245,21 @@ public class EmployeesPlanningController {
             employee.put("firstName", row[2]);
             employee.put("lastName", row[3]);
             employee.put("email", row[4]);
-            employee.put("active", ((Number) row[5]).intValue() == 1);
-            employee.put("workHoursPerDay", row[6]);
-            employee.put("creationDate", row[7]);
-            employee.put("modificationDate", row[8]);
+            employee.put("role", row[5]);
+            employee.put("active", ((Number) row[6]).intValue() == 1);
+            employee.put("workHoursPerDay", row[7]);
+            employee.put("creationDate", row[8]);
+            employee.put("modificationDate", row[9]);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("employee", employee);
 
-            log.info("✅ Retrieved details for employee: {}", employeeId);
+            log.info("Retrieved details for employee: {}", employeeId);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("❌ Error fetching employee details", e);
+            log.error("Error fetching employee details", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -255,7 +268,7 @@ public class EmployeesPlanningController {
     }
 
     /**
-     * 📋 GET EMPLOYEE ORDERS - Commandes assignées à un employé
+     * GET EMPLOYEE ORDERS - Orders assigned to an employee
      */
     @GetMapping("/{employeeId}/orders")
     public ResponseEntity<Map<String, Object>> getEmployeeOrders(
@@ -263,7 +276,7 @@ public class EmployeesPlanningController {
             @RequestParam(required = false) String date) {
 
         try {
-            log.info("📋 Fetching orders for employee: {}, date: {}", employeeId, date);
+            log.info("Fetching orders for employee: {}, date: {}", employeeId, date);
 
             String dateFilter = date != null ? " AND p.planning_date = '" + date + "'" : "";
 
@@ -329,11 +342,11 @@ public class EmployeesPlanningController {
             response.put("totalHours", Math.round(totalDuration / 60.0 * 100.0) / 100.0);
             response.put("totalCards", totalCards);
 
-            log.info("✅ Retrieved {} orders for employee {}", orders.size(), employeeId);
+            log.info("Retrieved {} orders for employee {}", orders.size(), employeeId);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("❌ Error fetching employee orders", e);
+            log.error("Error fetching employee orders", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -342,12 +355,12 @@ public class EmployeesPlanningController {
     }
 
     /**
-     * 🃏 GET ORDER CARDS - Cartes d'une commande spécifique
+     * GET ORDER CARDS - Cards of a specific order
      */
     @GetMapping("/order/{orderId}/cards")
     public ResponseEntity<Map<String, Object>> getOrderCards(@PathVariable String orderId) {
         try {
-            log.info("🃏 Fetching cards for order: {}", orderId);
+            log.info("Fetching cards for order: {}", orderId);
 
             String sql = """
                 SELECT 
@@ -389,11 +402,11 @@ public class EmployeesPlanningController {
             response.put("cards", cards);
             response.put("total", cards.size());
 
-            log.info("✅ Retrieved {} cards for order {}", cards.size(), orderId);
+            log.info("Retrieved {} cards for order {}", cards.size(), orderId);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("❌ Error fetching order cards", e);
+            log.error("Error fetching order cards", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());

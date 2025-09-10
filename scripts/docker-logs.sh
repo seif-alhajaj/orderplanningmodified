@@ -1,6 +1,6 @@
 # ========== SCRIPT 2: docker-logs.sh ==========
 #!/bin/bash
-echo "📋 LOGS DOCKER"
+echo " LOGS DOCKER"
 echo "=============="
 
 echo "--- LOGS BACKEND ---"

@@ -1,21 +1,21 @@
 # ========== SCRIPT 9: docker-dev.sh ==========
 #!/bin/bash
-echo "🚀 DÉVELOPPEMENT DOCKER"
+echo " DOCKER DEVELOPMENT"
 echo "======================="
 
-# Mode développement avec live reload
+# Development mode with live reload
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
-# ========== INSTRUCTIONS D'UTILISATION ==========
+# ========== INSTRUCTIONS FOR USE ==========
 echo ""
-echo "📝 UTILISATION DES SCRIPTS:"
+echo " USE OF SCRIPTS:"
 echo "============================"
 echo "chmod +x docker-*.sh"
 echo ""
-echo "./docker-build.sh     # Construire et démarrer"
-echo "./docker-logs.sh      # Voir les logs"
-echo "./docker-status.sh    # Vérifier le statut"
-echo "./docker-restart.sh   # Redémarrer"
-echo "./docker-stop.sh      # Arrêter"
-echo "./docker-clean.sh     # Nettoyer complètement"
-echo "./docker-db-connect.sh # Se connecter à MySQL"
+echo "./docker-build.sh     # Build and start"
+echo "./docker-logs.sh      # See the logs"
+echo "./docker-status.sh    # Check status"
+echo "./docker-restart.sh   # Restart"
+echo "./docker-stop.sh      # Stop"
+echo "./docker-clean.sh     # Clean completely"
+echo "./docker-db-connect.sh # Connect to MySQL"

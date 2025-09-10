@@ -1,17 +1,17 @@
 # ========== SCRIPT 8: docker-restart.sh ==========
 #!/bin/bash
-echo "🔄 RESTART DOCKER"
+echo " RESTART DOCKER"
 echo "================="
 
-# Service à redémarrer (backend, frontend, database, ou all)
+# Service to restart(backend, frontend, database, ou all)
 SERVICE=${1:-all}
 
 if [ "$SERVICE" = "all" ]; then
-    echo "Redémarrage de tous les services..."
+    echo "Restarting all services..."
     docker-compose restart
 else
-    echo "Redémarrage du service: $SERVICE"
+    echo "Restarting the service: $SERVICE"
     docker-compose restart $SERVICE
 fi
 
-echo "✅ Redémarrage terminé"
+echo " Reboot complete"

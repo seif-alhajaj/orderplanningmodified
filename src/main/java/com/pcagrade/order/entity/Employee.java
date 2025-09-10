@@ -51,6 +51,13 @@ public class Employee extends AbstractUlidEntity {
     private String email;
 
     /**
+     * Employee's role (GRADER, CERTIFIER, etc.)
+     */
+    @Column(name = "role", length = 20)
+    @Builder.Default
+    private String role = "GRADER";  // ← ADDED ROLE FIELD
+
+    /**
      * Work hours per day (default: 8 hours)
      */
     @Column(name = "work_hours_per_day")
@@ -125,6 +132,22 @@ public class Employee extends AbstractUlidEntity {
         return active != null && active;
     }
 
+    /**
+     * Check if employee is a certifier
+     * @return true if role is CERTIFIER
+     */
+    public boolean isCertifier() {
+        return "CERTIFIER".equalsIgnoreCase(role);
+    }
+
+    /**
+     * Check if employee is a grader
+     * @return true if role is GRADER
+     */
+    public boolean isGrader() {
+        return "GRADER".equalsIgnoreCase(role) || role == null;
+    }
+
     // ========== LIFECYCLE CALLBACKS ==========
 
     /**
@@ -137,6 +160,10 @@ public class Employee extends AbstractUlidEntity {
         }
         if (modificationDate == null) {
             modificationDate = LocalDateTime.now();
+        }
+        // Ensure role has a default value
+        if (role == null) {
+            role = "GRADER";
         }
     }
 
@@ -158,6 +185,22 @@ public class Employee extends AbstractUlidEntity {
                 .firstName(firstName)
                 .lastName(lastName)
                 .email(email)
+                .workHoursPerDay(workHours != null ? workHours : 8)
+                .active(true)
+                .creationDate(LocalDateTime.now())
+                .modificationDate(LocalDateTime.now())
+                .build();
+    }
+
+    /**
+     * Custom builder method to create an employee with specific role
+     */
+    public static Employee createEmployeeWithRole(String firstName, String lastName, String email, String role, Integer workHours) {
+        return Employee.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .role(role != null ? role : "GRADER")
                 .workHoursPerDay(workHours != null ? workHours : 8)
                 .active(true)
                 .creationDate(LocalDateTime.now())
@@ -199,6 +242,9 @@ public class Employee extends AbstractUlidEntity {
         }
         if (workHoursPerDay != null && workHoursPerDay > 12) {
             errors.add("Work hours per day cannot exceed 12 hours");
+        }
+        if (role != null && !role.matches("^(GRADER|CERTIFIER)$")) {
+            errors.add("Role must be either GRADER or CERTIFIER");
         }
 
         return errors;

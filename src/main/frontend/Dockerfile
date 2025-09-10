@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -33,7 +33,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Add a startup script to show we're running
 RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
-    echo 'echo "🚀 Starting Pokemon Card Planning Frontend..."' >> /docker-entrypoint.sh && \
+    echo 'echo " Starting Pokemon Card Planning Frontend..."' >> /docker-entrypoint.sh && \
     echo 'nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
     chmod +x /docker-entrypoint.sh
 

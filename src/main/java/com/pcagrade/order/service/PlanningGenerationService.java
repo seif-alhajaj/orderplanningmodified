@@ -25,15 +25,15 @@ public class PlanningGenerationService {
     private EmployeeService employeeService;
 
     /**
-     * 🎯 MÉTHODE TRANSACTIONNELLE qui fonctionne
-     * La clé : @Transactional avec REQUIRES_NEW pour isoler la transaction
+     * TRANSACTIONAL METHOD that works
+     * The key: @Transactional with REQUIRES_NEW to isolate the transaction
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Map<String, Object> createPlanningsTransactional(String startDate, Integer timePerCard, Boolean cleanFirst) {
         Map<String, Object> result = new HashMap<>();
 
         try {
-            log.info("🎯 TRANSACTIONAL PLANNING SERVICE - REQUIRES_NEW");
+            log.info("TRANSACTIONAL PLANNING SERVICE - REQUIRES_NEW");
 
             // ========== CLEAN FIRST ==========
             if (cleanFirst) {
@@ -42,9 +42,9 @@ public class PlanningGenerationService {
                     Query deleteQ = entityManager.createNativeQuery(deleteQuery);
                     int deleted = deleteQ.executeUpdate();
                     entityManager.flush(); // Force immediate execution
-                    log.info("🧹 Cleaned {} existing plannings", deleted);
+                    log.info("Cleaned {} existing plannings", deleted);
                 } catch (Exception cleanError) {
-                    log.error("❌ Clean failed: {}", cleanError.getMessage());
+                    log.error("Clean failed: {}", cleanError.getMessage());
                     throw cleanError; // Fail fast if clean fails
                 }
             }
@@ -138,7 +138,7 @@ public class PlanningGenerationService {
                     planningResult.put("cardCount", cardCount);
 
                     createdPlannings.add(planningResult);
-                    log.info("✅ Created planning for order: {} -> Employee: {}", orderNumber, employeeName);
+                    log.info("Created planning for order: {} -> Employee: {}", orderNumber, employeeName);
                 }
             }
 
@@ -147,7 +147,7 @@ public class PlanningGenerationService {
 
             // ========== RESULT ==========
             result.put("success", true);
-            result.put("message", String.format("✅ TRANSACTIONAL SUCCESS: %d plannings created", planningsSaved));
+            result.put("message", String.format("TRANSACTIONAL SUCCESS: %d plannings created", planningsSaved));
             result.put("processedOrders", planningsSaved);
             result.put("totalOrdersAnalyzed", orderResults.size());
             result.put("activeEmployees", employees.size());
@@ -156,11 +156,11 @@ public class PlanningGenerationService {
             result.put("startDate", startDate);
             result.put("algorithm", "SERVICE_TRANSACTIONAL");
 
-            log.info("🎉 TRANSACTIONAL SERVICE SUCCESS: {} plannings created", planningsSaved);
+            log.info("TRANSACTIONAL SERVICE SUCCESS: {} plannings created", planningsSaved);
             return result;
 
         } catch (Exception e) {
-            log.error("❌ Transactional service failed: {}", e.getMessage(), e);
+            log.error("Transactional service failed: {}", e.getMessage(), e);
 
             result.put("success", false);
             result.put("message", "Service failed: " + e.getMessage());

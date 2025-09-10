@@ -3,7 +3,7 @@
     <!-- Header with Mode Toggle -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900">👥 Employee Management & Planning</h1>
+        <h1 class="text-3xl font-bold text-gray-900">Employee Management & Planning</h1>
         <p class="text-gray-600 mt-1">
           {{ currentView === 'management' ? 'Manage team members and their information' : 'View employee schedules and workload distribution' }}
         </p>
@@ -18,7 +18,7 @@
             currentView === 'management' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-900'
           ]"
         >
-          👤 Management
+          Management
         </button>
         <button
           @click="currentView = 'planning'"
@@ -27,7 +27,7 @@
             currentView === 'planning' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-900'
           ]"
         >
-          📋 Planning View
+          Planning View
         </button>
       </div>
     </div>
@@ -94,7 +94,7 @@
     <!-- Employee List -->
     <div v-if="!selectedEmployeeId">
 
-      <!-- ✅ MANAGEMENT VIEW -->
+      <!-- MANAGEMENT VIEW -->
       <div v-if="currentView === 'management'" class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
           <div class="flex items-center justify-between">
@@ -127,7 +127,25 @@
               class="input-field"
               required
             >
-            <div class="flex space-x-2">
+            <select
+              v-model="newEmployee.role"
+              class="input-field"
+              required
+            >
+              <option value="GRADER">Grader</option>
+              <option value="CERTIFIER">Certifier</option>
+              <option value="GRADER_CERTIFIER">Both</option>
+            </select>
+            <input
+              v-model="newEmployee.workHoursPerDay"
+              type="number"
+              min="1"
+              max="12"
+              placeholder="Work Hours/Day"
+              class="input-field"
+              required
+            >
+            <div class="flex space-x-2 md:col-span-4">
               <button type="submit" class="btn-primary flex-1">Add</button>
               <button type="button" @click="showAddForm = false" class="btn-secondary">Cancel</button>
             </div>
@@ -170,6 +188,10 @@
                   <span class="font-medium">{{ employee.workHoursPerDay || 8 }}h/day</span>
                 </div>
                 <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Role:</span>
+                  <span class="font-medium">{{ formatRole(employee.role) }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
                   <span class="text-gray-600">Active Orders:</span>
                   <span class="font-medium">{{ employee.activeOrders || 0 }}</span>
                 </div>
@@ -181,13 +203,13 @@
                   @click="viewEmployee(employee.id)"
                   class="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded text-sm font-medium hover:bg-blue-100"
                 >
-                  👁️ View Details
+                  View Details
                 </button>
                 <button
                   @click="viewEmployeePlanning(employee.id)"
                   class="flex-1 bg-green-50 text-green-600 px-3 py-2 rounded text-sm font-medium hover:bg-green-100"
                 >
-                  📋 View Planning
+                  View Planning
                 </button>
               </div>
             </div>
@@ -195,21 +217,10 @@
         </div>
       </div>
 
-      <!-- ✅ PLANNING VIEW -->
+      <!-- PLANNING VIEW -->
       <div v-else-if="currentView === 'planning'" class="space-y-6">
 
         <!-- Planning Controls -->
-        <div class="bg-white rounded-lg shadow-sm border p-6">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">📅 Planning Overview</h2>
-            <input
-              v-model="selectedDate"
-              type="date"
-              class="border rounded-lg px-3 py-2"
-              @change="loadPlanningData"
-            >
-          </div>
-        </div>
         <div class="bg-white rounded-lg shadow-sm border p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Planning Overview</h2>
@@ -225,18 +236,18 @@
                 :disabled="loading"
                 class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
-                <span v-if="loading">⏳</span>
-                <span v-else>🚀</span>
-                <span>{{ loading ? 'Generating...' : 'Generate Planning' }}</span>
+                <span v-if="loading">Generating...</span>
+                <span v-else>Generate Planning</span>
               </button>
             </div>
           </div>
 
-          <!-- Description de l'algorithme unifié -->
+          <!-- Unified algorithm description -->
           <p class="text-sm text-gray-600">
             Using the same round-robin algorithm as Global Planning for consistent results across both pages.
           </p>
         </div>
+
         <!-- Planning Employee Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
@@ -287,18 +298,24 @@
                 </div>
               </div>
 
-              <!-- Action Buttons -->
+              <!-- Role and Action Buttons -->
+              <div class="mb-4">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Role:</span>
+                  <span class="font-medium">{{ formatRole(employee.role) }}</span>
+                </div>
+              </div>
               <div class="flex space-x-2">
                 <button
                   @click="viewEmployeeOrders(employee.id)"
                   class="flex-1 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
                 >
-                  👁️ View Orders & Cards
+                  View Orders & Cards
                 </button>
                 <button
                   class="bg-gray-50 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
                 >
-                  💳 {{ employee.totalCards || 0 }}
+                  {{ employee.totalCards || 0 }}
                 </button>
               </div>
             </div>
@@ -325,7 +342,7 @@
       </div>
     </div>
 
-    <!-- ✅ EMPLOYEE DETAIL VIEW -->
+    <!-- EMPLOYEE DETAIL VIEW -->
     <div v-else>
       <EmployeeDetailPage
         :employeeId="selectedEmployeeId"
@@ -348,6 +365,7 @@ interface Employee {
   firstName: string
   lastName: string
   email: string
+  role: 'GRADER' | 'CERTIFIER' | 'GRADER_CERTIFIER'
   status: 'AVAILABLE' | 'BUSY' | 'OFFLINE'
   workHoursPerDay?: number
   workload?: number
@@ -360,6 +378,8 @@ interface NewEmployee {
   firstName: string
   lastName: string
   email: string
+  role: 'GRADER' | 'CERTIFIER' | 'GRADER_CERTIFIER'
+  workHoursPerDay?: number
 }
 
 // ========== STATE ==========
@@ -374,7 +394,9 @@ const employees = ref<Employee[]>([])
 const newEmployee = ref<NewEmployee>({
   firstName: '',
   lastName: '',
-  email: ''
+  email: '',
+  role: 'GRADER',
+  workHoursPerDay: 8
 })
 
 // ========== COMPUTED ==========
@@ -399,21 +421,22 @@ const employeesWithWorkload = computed(() => {
 const loadEmployees = async () => {
   loading.value = true
   try {
-    console.log('🔍 Loading employees from API...')
-    const response = await fetch('/api/employees') // ✅ ENDPOINT CORRECT
+    console.log('Loading employees from API...')
+    const response = await fetch('/api/employees/active')
 
     if (response.ok) {
       const data = await response.json()
-      console.log('✅ Employees loaded:', data.length, 'employees')
+      console.log('Employees loaded:', data.length, 'employees')
 
-      // Mapper les données pour le frontend
-      employees.value = data.map(emp => ({
+      // Map data for frontend
+      employees.value = data.map((emp: any) => ({
         id: emp.id,
-        firstName: emp.firstName,
-        lastName: emp.lastName,
+        firstName: emp.firstName || emp.first_name,
+        lastName: emp.lastName || emp.last_name,
         email: emp.email,
+        role: emp.role || 'GRADER',
         status: emp.active ? 'AVAILABLE' : 'OFFLINE',
-        workHoursPerDay: emp.workHoursPerDay || 8,
+        workHoursPerDay: emp.workHoursPerDay || emp.work_hours_per_day || 8,
         workload: emp.currentLoad || 0,
         activeOrders: emp.activeOrders || 0,
         estimatedHours: Math.round((emp.currentLoad || 0) * (emp.workHoursPerDay || 8)),
@@ -421,43 +444,84 @@ const loadEmployees = async () => {
       }))
     } else {
       console.error('Failed to load employees:', response.status, response.statusText)
-      employees.value = []
+      // Fallback to demo data
+      employees.value = generateDemoEmployees()
     }
   } catch (error) {
     console.error('Error loading employees:', error)
-    employees.value = []
+    // Fallback to demo data
+    employees.value = generateDemoEmployees()
   } finally {
     loading.value = false
   }
+}
+
+const generateDemoEmployees = (): Employee[] => {
+  return [
+    {
+      id: '1',
+      firstName: 'Jean',
+      lastName: 'Martin',
+      email: 'jean.martin@pokemon.com',
+      role: 'GRADER',
+      status: 'AVAILABLE',
+      workHoursPerDay: 8,
+      workload: 0.3,
+      activeOrders: 2,
+      estimatedHours: 2,
+      totalCards: 67
+    },
+    {
+      id: '2',
+      firstName: 'Marie',
+      lastName: 'Dupont',
+      email: 'marie.dupont@pokemon.com',
+      role: 'CERTIFIER',
+      status: 'BUSY',
+      workHoursPerDay: 8,
+      workload: 0.9,
+      activeOrders: 4,
+      estimatedHours: 7,
+      totalCards: 145
+    },
+    {
+      id: '3',
+      firstName: 'Pierre',
+      lastName: 'Bernard',
+      email: 'pierre.bernard@pokemon.com',
+      role: 'GRADER_CERTIFIER',
+      status: 'AVAILABLE',
+      workHoursPerDay: 7,
+      workload: 0.6,
+      activeOrders: 3,
+      estimatedHours: 4,
+      totalCards: 89
+    }
+  ]
 }
 
 const loadPlanningData = async () => {
   if (currentView.value === 'planning') {
     try {
       await generateUnifiedPlanning()
-      // const response = await fetch(`/api/frontend/employees/planning-data?date=${selectedDate.value}`) // ✅ Nouveau endpoint
-      // if (response.ok) {
-      //   const data = await response.json()
-      //   employees.value = data.employees || employees.value
-      //   console.log('✅ Planning data loaded:', data.employees?.length, 'employees')
-      // }
     } catch (error) {
       console.error('Error loading planning data:', error)
     }
   }
 }
+
 const generateUnifiedPlanning = async () => {
   try {
     loading.value = true
 
-    console.log('🔄 Generating unified planning...')
+    console.log('Generating unified planning...')
 
     const response = await fetch('/api/planning/generate-unified', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        startDate: '2025-06-01', // t1 - commandes depuis cette date
-        planningDate: selectedDate.value, // t2 - planifier pour cette date
+        startDate: '2025-06-01',
+        planningDate: selectedDate.value,
         timePerCard: 3,
         cleanFirst: true
       })
@@ -477,23 +541,14 @@ const generateUnifiedPlanning = async () => {
         console.log(`  Orders assigned: ${totalAssigned}`)
         console.log(`  Orders analyzed: ${totalAnalyzed}`)
         console.log(`  Employees: ${employees.value.length}`)
-
-        showNotification(
-          `Planning generated! ${totalAssigned} orders assigned using Global Planning algorithm`,
-          'success'
-        )
-      } else {
-        showNotification(result.message || 'Planning generation failed', 'error')
       }
     } else {
       const errorText = await response.text()
       console.error('Unified planning failed:', errorText)
-      showNotification('Failed to generate unified planning', 'error')
     }
 
   } catch (error) {
     console.error('Error generating unified planning:', error)
-    showNotification('Error generating unified planning', 'error')
   } finally {
     loading.value = false
   }
@@ -501,16 +556,24 @@ const generateUnifiedPlanning = async () => {
 
 const addEmployee = async () => {
   try {
+    // Map the role for backend compatibility
+    const employeeToSend = {
+      ...newEmployee.value,
+      active: true
+    }
+
     const response = await fetch('/api/employees', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newEmployee.value)
+      body: JSON.stringify(employeeToSend)
     })
 
     if (response.ok) {
-      newEmployee.value = { firstName: '', lastName: '', email: '' }
+      newEmployee.value = { firstName: '', lastName: '', email: '', role: 'GRADER', workHoursPerDay: 8 }
       showAddForm.value = false
       await loadEmployees()
+    } else {
+      console.error('Failed to add employee:', await response.text())
     }
   } catch (error) {
     console.error('Error adding employee:', error)
@@ -537,16 +600,25 @@ const refreshEmployees = () => {
   }
 }
 
+const formatRole = (role: string) => {
+  switch(role) {
+    case 'GRADER': return 'Grader';
+    case 'CERTIFIER': return 'Certifier';
+    case 'GRADER_CERTIFIER': return 'Grader & Certifier';
+    default: return role;
+  }
+}
+
 // Helper functions
 const getInitials = (employee: Employee) => {
   return `${employee.firstName?.charAt(0) || ''}${employee.lastName?.charAt(0) || ''}`
 }
 
 const getWorkloadStatus = (workload: number) => {
-  if (workload < 0.5) return '🟢 Available'
-  if (workload < 0.8) return '🟡 Moderate'
-  if (workload < 1.0) return '🟠 Busy'
-  return '🔴 Overloaded'
+  if (workload < 0.5) return 'Available'
+  if (workload < 0.8) return 'Moderate'
+  if (workload < 1.0) return 'Busy'
+  return 'Overloaded'
 }
 
 const getWorkloadColor = (workload: number) => {

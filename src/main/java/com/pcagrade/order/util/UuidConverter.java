@@ -1,6 +1,6 @@
-// ============= UUIDCONVERTER - CONVERSION AUTOMATIQUE =============
+// ============= UUIDCONVERTER - AUTOMATIC CONVERSION =============
 
-// ✅ CRÉEZ ce nouveau fichier : UuidConverter.java
+// CREATE this new file: UuidConverter.java
 
 package com.pcagrade.order.util;
 
@@ -11,10 +11,10 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 /**
- * ✅ Convertisseur automatique UUID ↔ BINARY(16)
- *
- * Gère la conversion transparente entre UUID Java et BINARY(16) MariaDB
- */
+* Automatic UUID ↔ BINARY(16) converter
+*
+* Handles seamless conversion between Java UUID and MariaDB BINARY(16)
+*/
 @Converter(autoApply = true)
 public class UuidConverter implements AttributeConverter<UUID, byte[]> {
 
@@ -25,18 +25,18 @@ public class UuidConverter implements AttributeConverter<UUID, byte[]> {
         }
 
         try {
-            // Convertir UUID en bytes pour BINARY(16)
+            // Convert UUID to bytes for BINARY(16)
             ByteBuffer buffer = ByteBuffer.allocate(16);
             buffer.putLong(uuid.getMostSignificantBits());
             buffer.putLong(uuid.getLeastSignificantBits());
 
             byte[] bytes = buffer.array();
-            System.out.println("💾 UUID → BINARY(16): " + uuid + " → " + bytesToHex(bytes));
+            System.out.println(" UUID → BINARY(16): " + uuid + " → " + bytesToHex(bytes));
 
             return bytes;
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur conversion UUID → bytes: " + e.getMessage());
+            System.err.println(" Error conversion UUID → bytes: " + e.getMessage());
             return null;
         }
     }
@@ -48,24 +48,24 @@ public class UuidConverter implements AttributeConverter<UUID, byte[]> {
         }
 
         try {
-            // Convertir bytes BINARY(16) en UUID
+           // Convert bytes BINARY(16) to UUID
             ByteBuffer buffer = ByteBuffer.wrap(bytes);
             long mostSigBits = buffer.getLong();
             long leastSigBits = buffer.getLong();
 
             UUID uuid = new UUID(mostSigBits, leastSigBits);
-            System.out.println("🔄 BINARY(16) → UUID: " + bytesToHex(bytes) + " → " + uuid);
+            System.out.println(" BINARY(16) → UUID: " + bytesToHex(bytes) + " → " + uuid);
 
             return uuid;
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur conversion bytes → UUID: " + e.getMessage());
+            System.err.println(" Error conversion bytes → UUID: " + e.getMessage());
             return null;
         }
     }
 
     /**
-     * Utilitaire : Convertir bytes en hex pour debug
+    * Utility: Convert bytes to hex for debugging
      */
     private String bytesToHex(byte[] bytes) {
         if (bytes == null) return "null";

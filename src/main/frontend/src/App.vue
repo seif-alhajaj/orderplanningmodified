@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center">
-            <h1 class="text-xl font-bold">🃏 Pokemon Card Planning</h1>
+            <h1 class="text-xl font-bold"> Pokemon Card Planning</h1>
           </div>
           <div class="flex space-x-4">
             <button
@@ -26,7 +26,7 @@
       </div>
     </nav>
 
-    <!-- Contenu principal -->
+    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-6">
       <!-- Dashboard -->
       <DashboardView v-if="activeTab === 'dashboard'" @go-to-tab="changeTab" />
@@ -61,7 +61,7 @@ import OrdersView from './views/Orders.vue'
 import EmployeesView from './views/Employees.vue'
 import PlanningView from './views/Planning.vue'
 
-// État global
+// Global state
 const activeTab = ref('dashboard')
 const notification = ref({
   show: false,
@@ -70,19 +70,19 @@ const notification = ref({
 })
 
 const tabs = [
-  { id: 'dashboard', label: '📊 Dashboard' },
-  { id: 'orders', label: '📋 Orders' },
-  { id: 'employees', label: '👥 Employees & Planning' },
-  { id: 'planning', label: '📅 Global Planning' }
+  { id: 'dashboard', label: ' Dashboard' },
+  { id: 'orders', label: ' Orders' },
+  { id: 'employees', label: ' Employees & Planning' },
+  { id: 'planning', label: ' Global Planning' }
 ]
 
-// Fonction pour changer d'onglet
+// Function to change tabs
 const changeTab = (tabId: string) => {
   console.log('Changing to tab:', tabId)
   activeTab.value = tabId
 }
 
-// Fonction pour afficher les notifications
+// Function to display notifications
 const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
   notification.value = { show: true, message, type }
   setTimeout(() => {
@@ -90,7 +90,7 @@ const showNotification = (message: string, type: 'success' | 'error' = 'success'
   }, 3000)
 }
 
-// Provide pour les composants enfants
+// Provide for child components
 provide('showNotification', showNotification)
 provide('changeTab', changeTab)
 </script>

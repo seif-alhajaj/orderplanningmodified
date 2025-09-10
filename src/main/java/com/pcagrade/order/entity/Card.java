@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ⚠️  ENTITÉ CARD - TABLE PARTAGÉE AVEC D'AUTRES PROJETS
+ * CARD ENTITY - SHARED TABLE WITH OTHER PROJECTS
  *
- * IMPORTANT : Cette table est utilisée par plusieurs projets.
- * - NE PAS faire de migrations automatiques
- * - NE PAS modifier la structure existante
- * - Utiliser seulement en LECTURE pour ce projet de planification
+ * IMPORTANT: This table is used by multiple projects.
+ * - DO NOT perform automatic migrations
+ * - DO NOT modify the existing structure
+ * - Use only for READ operations in this planning project
  */
 @Getter
 @Setter
@@ -36,22 +36,22 @@ public class Card extends AbstractUlidEntity {
     private String num;
 
     /**
-     * ✅ CORRECTIF : Mapping de la colonne existante SANS migration
-     * - Utilise @Basic au lieu de @Lob pour éviter les tentatives de conversion
-     * - Pas de columnDefinition pour éviter les conflits
-     * - Hibernate prendra la définition existante de la base
+     * CORRECTION: Mapping of existing column WITHOUT migration
+     * - Use @Basic instead of @Lob to avoid conversion attempts
+     * - No columnDefinition to avoid conflicts
+     * - Hibernate will use the existing database definition
      */
     @NotNull
-    @Basic(fetch = FetchType.LAZY) // Chargement paresseux pour les gros attributs
+    @Basic(fetch = FetchType.LAZY) // Lazy loading for large attributes
     @Column(name = "attributes", nullable = false)
     private String attributes;
 
     /**
-     * ✅ CORRECTIF : Mapping des notes existantes SANS migration
+     * CORRECTION: Mapping of existing notes WITHOUT migration
      */
     @NotNull
     @ColumnDefault("'[]'")
-    @Basic(fetch = FetchType.LAZY) // Chargement paresseux
+    @Basic(fetch = FetchType.LAZY) // Lazy loading
     @Column(name = "allowed_notes", nullable = false)
     private String allowedNotes;
 
@@ -64,44 +64,44 @@ public class Card extends AbstractUlidEntity {
     private Integer imageId;
 
     /**
-     * ✅ Relation avec les traductions - LECTURE SEULE pour sécurité
+     * Relation with translations - READ ONLY for safety
      */
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "card") // Pas de cascade pour éviter modifications
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "card") // No cascade to avoid modifications
     private List<CardTranslation> translations = new ArrayList<>();
 
     // ===============================================
-    // MÉTHODES UTILITAIRES POUR PLANIFICATION
+    // UTILITY METHODS FOR PLANNING
     // ===============================================
 
     /**
-     * Récupère le nom de la carte pour la planification (lecture seule)
+     * Gets the card name for planning (read only)
      */
     public String getNomPourPlanification() {
         if (translations != null && !translations.isEmpty()) {
             return translations.get(0).getName();
         }
-        return "Carte " + discriminator + " " + num;
+        return "Card " + discriminator + " " + num;
     }
 
     /**
-     * Vérifie si la carte a des attributs (pour estimation de temps)
+     * Checks if the card has attributes (for time estimation)
      */
     public boolean hasComplexAttributes() {
         return attributes != null && attributes.length() > 100;
     }
 
     /**
-     * Estimation du temps de traitement basé sur la complexité
+     * Processing time estimation based on complexity
      */
     public int getEstimatedProcessingMinutes() {
-        int baseTime = 3; // 3 minutes par défaut
+        int baseTime = 3; // 3 minutes default
 
         if (hasComplexAttributes()) {
-            baseTime += 2; // +2 minutes pour cartes complexes
+            baseTime += 2; // +2 minutes for complex cards
         }
 
         if (translations != null && translations.size() > 1) {
-            baseTime += 1; // +1 minute pour cartes multilingues
+            baseTime += 1; // +1 minute for multilingual cards
         }
 
         return baseTime;

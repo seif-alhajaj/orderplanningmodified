@@ -5,14 +5,14 @@ import com.github.f4b6a3.ulid.Ulid;
 public class UlidUtils {
 
     /**
-     * Convertit un hex string en Ulid
+     * Converts a hex string to Ulid
      */
     public static Ulid fromHexString(String hexString) {
         if (hexString == null || hexString.length() != 32) {
             throw new IllegalArgumentException("Hex string doit faire 32 caractères");
         }
 
-        // Convertir hex string en bytes
+       // Convert hex string to bytes
         byte[] bytes = new byte[16];
         for (int i = 0; i < 16; i++) {
             bytes[i] = (byte) Integer.parseInt(hexString.substring(i * 2, i * 2 + 2), 16);
@@ -21,8 +21,8 @@ public class UlidUtils {
         return Ulid.from(bytes);
     }
 
-    /**
-     * Convertit un Ulid en hex string
+   /**
+     * Converts an Ulid to hex string
      */
     public static String toHexString(Ulid ulid) {
         byte[] bytes = ulid.toBytes();

@@ -86,6 +86,83 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
             "ORDER BY e.lastName, e.firstName")
     List<Employee> findByFullNameContainingIgnoreCase(@Param("searchTerm") String searchTerm);
 
+    // ========== ROLE-BASED QUERIES ==========
+
+    /**
+     * Find employees by role
+     * @param role the role to search for (GRADER, CERTIFIER, etc.)
+     * @return list of employees with the specified role
+     */
+    List<Employee> findByRole(String role);
+
+    /**
+     * Find employees by role and active status
+     * @param role the role to search for
+     * @param active the active status
+     * @return list of employees with the specified role and active status
+     */
+    List<Employee> findByRoleAndActive(String role, Boolean active);
+
+    /**
+     * Find active employees by role
+     * @param role the role to search for
+     * @return list of active employees with the specified role
+     */
+    @Query("SELECT e FROM Employee e WHERE e.role = :role AND e.active = true ORDER BY e.lastName, e.firstName")
+    List<Employee> findActiveByRole(@Param("role") String role);
+
+    /**
+     * Count employees by role
+     * @param role the role to count
+     * @return number of employees with the specified role
+     */
+    long countByRole(String role);
+
+    /**
+     * Count employees by role and active status
+     * @param role the role to count
+     * @param active the active status
+     * @return number of employees with the specified role and active status
+     */
+    long countByRoleAndActive(String role, Boolean active);
+
+    /**
+     * Get employee count by role (grouped)
+     * @return list of object arrays containing [role, count]
+     */
+    @Query("SELECT e.role, COUNT(e) FROM Employee e WHERE e.active = true GROUP BY e.role ORDER BY e.role")
+    List<Object[]> getEmployeeCountByRole();
+
+    /**
+     * Find certifiers (employees with CERTIFIER role)
+     * @return list of certifiers
+     */
+    @Query("SELECT e FROM Employee e WHERE e.role = 'CERTIFIER' AND e.active = true ORDER BY e.lastName, e.firstName")
+    List<Employee> findCertifiers();
+
+    /**
+     * Find graders (employees with GRADER role)
+     * @return list of graders
+     */
+    @Query("SELECT e FROM Employee e WHERE e.role = 'GRADER' AND e.active = true ORDER BY e.lastName, e.firstName")
+    List<Employee> findGraders();
+
+    /**
+     * Find available certifiers for planning
+     * @return list of active certifiers available for planning
+     */
+    @Query("SELECT e FROM Employee e WHERE e.role = 'CERTIFIER' AND e.active = true " +
+           "ORDER BY e.workHoursPerDay DESC, e.lastName")
+    List<Employee> findAvailableCertifiers();
+
+    /**
+     * Find available graders for planning
+     * @return list of active graders available for planning
+     */
+    @Query("SELECT e FROM Employee e WHERE e.role = 'GRADER' AND e.active = true " +
+           "ORDER BY e.workHoursPerDay DESC, e.lastName")
+    List<Employee> findAvailableGraders();
+
     // ========== WORK HOURS QUERIES ==========
 
     /**
@@ -172,25 +249,22 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     List<Object[]> getEmployeeCountByWorkHours();
 
     /**
-     * Get workload statistics for employees
-     * @return list of object arrays containing employee workload data
-     */
-    /**
-     * Get workload statistics for employees
+     * Get workload statistics for employees including role
      * @return list of object arrays containing employee workload data
      */
     @Query(value = """
     SELECT 
         HEX(e.id) as employee_id,
         CONCAT(e.first_name, ' ', e.last_name) as full_name,
+        e.role,
         e.work_hours_per_day,
         COUNT(p.id) as planning_count,
         COALESCE(SUM(p.duration_minutes), 0) as total_minutes
     FROM employee e 
     LEFT JOIN planning p ON e.id = p.employee_id
     WHERE e.active = 1
-    GROUP BY e.id, e.first_name, e.last_name, e.work_hours_per_day
-    ORDER BY e.last_name, e.first_name
+    GROUP BY e.id, e.first_name, e.last_name, e.role, e.work_hours_per_day
+    ORDER BY e.role, e.last_name, e.first_name
     """, nativeQuery = true)
     List<Object[]> getEmployeeWorkloadStatistics();
 
@@ -238,4 +312,26 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
         LIMIT 10
         """, nativeQuery = true)
     List<Object[]> findTopPerformers();
+
+    /**
+     * Find employees by role with workload statistics
+     * @param role the role to filter by
+     * @return list of employees with workload data for the specified role
+     */
+    @Query(value = """
+        SELECT 
+            HEX(e.id) as employee_id,
+            CONCAT(e.first_name, ' ', e.last_name) as full_name,
+            e.role,
+            e.work_hours_per_day,
+            COUNT(p.id) as planning_count,
+            COALESCE(SUM(p.duration_minutes), 0) as total_minutes,
+            ROUND(COALESCE(SUM(p.duration_minutes), 0) / (e.work_hours_per_day * 60) * 100, 2) as load_percentage
+        FROM employee e 
+        LEFT JOIN planning p ON e.id = p.employee_id
+        WHERE e.active = 1 AND e.role = :role
+        GROUP BY e.id, e.first_name, e.last_name, e.role, e.work_hours_per_day
+        ORDER BY load_percentage DESC, e.last_name, e.first_name
+        """, nativeQuery = true)
+    List<Object[]> getRoleWorkloadStatistics(@Param("role") String role);
 }

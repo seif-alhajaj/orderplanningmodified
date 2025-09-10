@@ -30,12 +30,12 @@ public class OrderController {
     @GetMapping("")
     public ResponseEntity<List<Map<String, Object>>> getAllOrdersMain() {
         try {
-            System.out.println("📋 Main orders endpoint - getting recent orders");
+            System.out.println("Main orders endpoint - getting recent orders");
             List<Map<String, Object>> orders = orderService.getRecentOrdersAsMap();
-            System.out.println("✅ " + orders.size() + " orders returned from main endpoint");
+            System.out.println("" + orders.size() + " orders returned from main endpoint");
             return ResponseEntity.ok(orders);
         } catch (Exception e) {
-            System.err.println("❌ Error in main orders endpoint: " + e.getMessage());
+            System.err.println("Error in main orders endpoint: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(new ArrayList<>());
         }
@@ -44,16 +44,16 @@ public class OrderController {
     @GetMapping("/frontend/orders")
     public ResponseEntity<List<Map<String, Object>>> getOrdersFrontend() {
         try {
-            System.out.println("📋 Frontend: Retrieving orders with real data");
+            System.out.println("Frontend: Retrieving orders with real data");
 
             // Use the correct method that returns List<Map<String, Object>>
             List<Map<String, Object>> orders = orderService.getRecentOrdersAsMap();
 
-            System.out.println("✅ " + orders.size() + " orders returned");
+            System.out.println("" + orders.size() + " orders returned");
             return ResponseEntity.ok(orders);
 
         } catch (Exception e) {
-            System.err.println("❌ Error retrieving orders: " + e.getMessage());
+            System.err.println("Error retrieving orders: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(new ArrayList<>());
         }
@@ -62,7 +62,7 @@ public class OrderController {
     @GetMapping("/frontend/orders/{id}/cards")
     public ResponseEntity<Map<String, Object>> getOrderCards(@PathVariable String id) {
         try {
-            System.out.println("🃏 Frontend: Retrieving cards for order: " + id);
+            System.out.println("Frontend: Retrieving cards for order: " + id);
 
             String sql = """
             SELECT 
@@ -96,7 +96,7 @@ public class OrderController {
                 cards.add(card);
             }
 
-            System.out.println("✅ " + cards.size() + " cards found for order " + id);
+            System.out.println("" + cards.size() + " cards found for order " + id);
             return ResponseEntity.ok(Map.of(
                     "orderId", id,
                     "cards", cards,
@@ -104,7 +104,7 @@ public class OrderController {
             ));
 
         } catch (Exception e) {
-            System.err.println("❌ Error loading cards: " + e.getMessage());
+            System.err.println("Error loading cards: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
@@ -118,7 +118,7 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         try {
-            System.out.println("📋 Retrieving all orders - page: " + page + ", size: " + size);
+            System.out.println("Retrieving all orders - page: " + page + ", size: " + size);
 
             List<Map<String, Object>> orders = orderService.getAllOrdersAsMap();
 
@@ -132,11 +132,11 @@ public class OrderController {
 
             List<Map<String, Object>> paginatedOrders = orders.subList(start, end);
 
-            System.out.println("✅ Returning " + paginatedOrders.size() + " orders (page " + page + ")");
+            System.out.println("Returning " + paginatedOrders.size() + " orders (page " + page + ")");
             return ResponseEntity.ok(paginatedOrders);
 
         } catch (Exception e) {
-            System.err.println("❌ Error retrieving all orders: " + e.getMessage());
+            System.err.println("Error retrieving all orders: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(new ArrayList<>());
         }
@@ -151,15 +151,15 @@ public class OrderController {
             @RequestParam int month,
             @RequestParam int year) {
         try {
-            System.out.println("📋 Retrieving orders for planning since: " + day + "/" + month + "/" + year);
+            System.out.println("Retrieving orders for planning since: " + day + "/" + month + "/" + year);
 
             List<Map<String, Object>> orders = orderService.getOrdersForPlanning(day, month, year);
 
-            System.out.println("✅ " + orders.size() + " orders found for planning");
+            System.out.println("" + orders.size() + " orders found for planning");
             return ResponseEntity.ok(orders);
 
         } catch (Exception e) {
-            System.err.println("❌ Error retrieving orders for planning: " + e.getMessage());
+            System.err.println("Error retrieving orders for planning: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(new ArrayList<>());
         }
@@ -171,15 +171,15 @@ public class OrderController {
     @GetMapping("/statistics")
     public ResponseEntity<Map<String, Object>> getOrderStatistics() {
         try {
-            System.out.println("📊 Retrieving order statistics");
+            System.out.println("Retrieving order statistics");
 
             Map<String, Object> statistics = orderService.getOrderStatistics();
 
-            System.out.println("✅ Order statistics retrieved successfully");
+            System.out.println("Order statistics retrieved successfully");
             return ResponseEntity.ok(statistics);
 
         } catch (Exception e) {
-            System.err.println("❌ Error retrieving order statistics: " + e.getMessage());
+            System.err.println("Error retrieving order statistics: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of(
                     "success", false,
@@ -197,7 +197,7 @@ public class OrderController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority) {
         try {
-            System.out.println("🔍 Searching orders with criteria: " + searchTerm + ", " + status + ", " + priority);
+            System.out.println("Searching orders with criteria: " + searchTerm + ", " + status + ", " + priority);
 
             // Convert string parameters to enums if provided
             Order.OrderStatus orderStatus = null;
@@ -235,22 +235,22 @@ public class OrderController {
                     })
                     .toList();
 
-            System.out.println("✅ " + orderMaps.size() + " orders found matching criteria");
+            System.out.println("" + orderMaps.size() + " orders found matching criteria");
             return ResponseEntity.ok(orderMaps);
 
         } catch (Exception e) {
-            System.err.println("❌ Error searching orders: " + e.getMessage());
+            System.err.println("Error searching orders: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(new ArrayList<>());
         }
     }
 
     // ===============================================
-// AJOUTEZ CETTE MÉTHODE À VOTRE CONTROLLER EXISTANT
-// ===============================================
+    // ADD THIS METHOD TO YOUR EXISTING CONTROLLER
+    // ===============================================
 
     /**
-     * 📦 ENDPOINT ORDERS SINCE JUNE 1, 2025 (ENGLISH)
+     * ORDERS SINCE JUNE 1, 2025 ENDPOINT (ENGLISH)
      *
      * Returns real orders from database where date >= '2025-06-01'
      * This uses the 'date' field which is the order creation date
@@ -258,14 +258,14 @@ public class OrderController {
     @GetMapping("/api/orders/since-june-2025")
     public ResponseEntity<List<Map<String, Object>>> getOrdersSinceJune2025() {
         try {
-            System.out.println("📦 === ORDERS SINCE JUNE 1, 2025 ===");
+            System.out.println("=== ORDERS SINCE JUNE 1, 2025 ===");
 
             // SQL query to get orders since June 1, 2025
             String sqlOrders = """
             SELECT 
                 HEX(o.id) as id,
                 o.num_commande as orderNumber,
-                COALESCE(o.priorite_string, 'MEDIUM') as priority,
+                COALESCE(o.priority_string, 'FAST') as priority,
                 o.status,
                 DATE(o.date) as creationDate,
                 o.date as fullTimestamp,
@@ -311,11 +311,11 @@ public class OrderController {
 
                 // Quality indicator
                 if (namePercentage >= 95) {
-                    order.put("qualityIndicator", "🟢");
+                    order.put("qualityIndicator", "");
                 } else if (namePercentage >= 80) {
-                    order.put("qualityIndicator", "🟡");
+                    order.put("qualityIndicator", "");
                 } else {
-                    order.put("qualityIndicator", "🔴");
+                    order.put("qualityIndicator", "");
                 }
 
                 // Additional fields for frontend compatibility
@@ -326,24 +326,24 @@ public class OrderController {
                 orders.add(order);
             }
 
-            System.out.println("✅ Found " + orders.size() + " orders since June 1, 2025");
+            System.out.println("Found " + orders.size() + " orders since June 1, 2025");
 
             // Log sample for debugging
             if (!orders.isEmpty()) {
-                System.out.println("📋 Sample order: " + orders.get(0));
+                System.out.println("Sample order: " + orders.get(0));
             }
 
             return ResponseEntity.ok(orders);
 
         } catch (Exception e) {
-            System.err.println("❌ Error getting orders since June 2025: " + e.getMessage());
+            System.err.println("Error getting orders since June 2025: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(new ArrayList<>());
         }
     }
 
     /**
-     * 📦 ENDPOINT ORDERS WITH DATE FILTER (ENGLISH)
+     * ORDERS WITH DATE FILTER ENDPOINT (ENGLISH)
      *
      * More flexible endpoint that accepts a date parameter
      */
@@ -351,13 +351,13 @@ public class OrderController {
     public ResponseEntity<List<Map<String, Object>>> getOrdersSince(
             @RequestParam(defaultValue = "2025-06-01") String sinceDate) {
         try {
-            System.out.println("📦 === ORDERS SINCE " + sinceDate + " ===");
+            System.out.println("=== ORDERS SINCE " + sinceDate + " ===");
 
             String sqlOrders = """
             SELECT 
                 HEX(o.id) as id,
                 o.num_commande as orderNumber,
-                COALESCE(o.priorite_string, 'MEDIUM') as priority,
+                COALESCE(o.priority_string, 'FAST') as priority,
                 o.status,
                 DATE(o.date) as creationDate,
                 o.date as fullTimestamp,
@@ -401,11 +401,11 @@ public class OrderController {
                 order.put("namePercentage", Math.round(namePercentage));
 
                 if (namePercentage >= 95) {
-                    order.put("qualityIndicator", "🟢");
+                    order.put("qualityIndicator", "");
                 } else if (namePercentage >= 80) {
-                    order.put("qualityIndicator", "🟡");
+                    order.put("qualityIndicator", "");
                 } else {
-                    order.put("qualityIndicator", "🔴");
+                    order.put("qualityIndicator", "");
                 }
 
                 order.put("estimatedTimeHours", String.format("%.1fh", ((Number) row[6]).doubleValue() / 60));
@@ -415,19 +415,19 @@ public class OrderController {
                 orders.add(order);
             }
 
-            System.out.println("✅ Found " + orders.size() + " orders since " + sinceDate);
+            System.out.println("Found " + orders.size() + " orders since " + sinceDate);
             return ResponseEntity.ok(orders);
 
         } catch (Exception e) {
-            System.err.println("❌ Error getting orders since " + sinceDate + ": " + e.getMessage());
+            System.err.println("Error getting orders since " + sinceDate + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(new ArrayList<>());
         }
     }
 
-// ===============================================
-// MÉTHODES UTILITAIRES
-// ===============================================
+    // ===============================================
+    // UTILITY METHODS
+    // ===============================================
 
     /**
      * Map status number to text

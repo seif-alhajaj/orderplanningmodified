@@ -1,6 +1,6 @@
-// ============= ULIDGENERATOR - GÉNÈRE UUID DEPUIS ULID =============
+// ============= ULIDGENERATOR - GENERATE UUID FROM ULID =============
 
-// ✅ REMPLACEZ votre UlidGenerator.java par cette version :
+//  REPLACE your UlidGenerator.java with this version:
 
 package com.pcagrade.order.util;
 
@@ -13,31 +13,31 @@ import java.io.Serializable;
 import java.util.UUID;
 
 /**
- * ✅ Générateur ULID compatible BINARY(16)
+ *  ULID generator compatible with BINARY(16)
  *
- * Génère des ULID et les convertit en UUID pour stockage MariaDB
- * Les ULID conservent l'ordre chronologique même convertis en UUID
+ * Generates ULIDs and converts them to UUID for MariaDB storage
+ * ULIDs maintain chronological order even when converted to UUID
  */
 public class UlidGenerator implements IdentifierGenerator {
 
     @Override
     public Serializable generate(SharedSessionContractImplementor session, Object object) {
         try {
-            // Générer un ULID monotonique (ordre chronologique garanti)
+            // Generate a monotonic ULID (chronological order guaranteed)
             Ulid ulid = UlidCreator.getMonotonicUlid();
 
-            // Convertir en UUID pour stockage BINARY(16)
+            // Convert to UUID for BINARY(16) storage
             UUID uuid = ulid.toUuid();
 
-            System.out.println("🆔 Generated ULID: " + ulid + " → UUID: " + uuid);
+            System.out.println("Generated ULID: " + ulid + " -> UUID: " + uuid);
 
-            return uuid; // ✅ Retourner UUID pour compatibilité BINARY(16)
+            return uuid; //  Return UUID for BINARY(16) compatibility
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur génération ULID: " + e.getMessage());
-            // Fallback : UUID classique
+            System.err.println("ULID generation error: " + e.getMessage());
+            // Fallback: classic UUID
             UUID fallback = UUID.randomUUID();
-            System.out.println("🔄 Fallback UUID: " + fallback);
+            System.out.println("Fallback UUID: " + fallback);
             return fallback;
         }
     }

@@ -11,7 +11,7 @@
         <relativePath/>
     </parent>
 
-    <!-- ✅ Configuration de base -->
+   <!--  Basic configuration -->
     <groupId>com.pcagrade</groupId>
     <artifactId>orderplanning</artifactId>
     <version>1.0.0</version>
@@ -29,7 +29,7 @@
     </properties>
 
     <dependencies>
-        <!-- ✅ Spring Boot Dependencies -->
+        <!-- Spring Boot Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -45,20 +45,20 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- ✅ Database -->
+        <!--  Database -->
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ✅ Liquibase for database migrations -->
+        <!--  Liquibase for database migrations -->
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
 
-        <!-- ✅ Utility Libraries -->
+        <!--  Utility Libraries -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -70,21 +70,21 @@
             <version>5.2.3</version>
         </dependency>
 
-        <!-- ✅ Development Tools -->
+        <!--  Development Tools -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- ✅ API Documentation -->
+        <!--  API Documentation -->
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
             <version>2.2.22</version>
         </dependency>
 
-        <!-- ✅ Testing -->
+        <!--  Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -96,7 +96,7 @@
         <finalName>pokemon-card-planning</finalName>
 
         <plugins>
-            <!-- ✅ Spring Boot Maven Plugin avec PlanningApplication -->
+            <!--  Spring Boot Maven Plugin avec PlanningApplication -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -107,7 +107,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <!-- ✅ Classe principale: PlanningApplication -->
+                    <!--  Classe principale: PlanningApplication -->
                     <mainClass>com.pcagrade.order.PlanningApplication</mainClass>
                     <executable>true</executable>
                 </configuration>
@@ -120,7 +120,7 @@
                 </executions>
             </plugin>
 
-            <!-- ✅ Maven Compiler Plugin -->
+            <!--  Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -142,7 +142,7 @@
                 </configuration>
             </plugin>
 
-            <!-- ✅ Surefire Plugin for Tests -->
+            <!--  Surefire Plugin for Tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -152,7 +152,7 @@
                 </configuration>
             </plugin>
 
-            <!-- ✅ JAR Plugin with correct main class -->
+            <!--  JAR Plugin with correct main class -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -167,7 +167,7 @@
             </plugin>
         </plugins>
 
-        <!-- ✅ Resources Configuration -->
+        <!--  Resources Configuration -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -190,7 +190,7 @@
         </resources>
     </build>
 
-    <!-- ✅ Repository Configuration -->
+    <!--  Repository Configuration -->
     <repositories>
         <repository>
             <id>spring-milestones</id>

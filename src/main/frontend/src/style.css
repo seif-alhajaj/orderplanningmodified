@@ -1,19 +1,19 @@
-/* ✅ Import Google Fonts en premier */
+/*  Import Google Fonts first */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ✅ Tailwind CSS v3 directives */
+/* Tailwind CSS v3 directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ✅ Styles de base */
+/* Basic Styles */
 @layer base {
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 }
 
-/* ✅ Composants personnalisés */
+/* Custom Components */
 @layer components {
   .btn-primary {
     @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed;
@@ -60,7 +60,7 @@
   }
 }
 
-/* ✅ Utilitaires personnalisés */
+/*  Custom Utilities */
 @layer utilities {
   .text-shadow {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -72,7 +72,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
-  /* Scrollbar personnalisée */
+ /* Custom Scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -87,7 +87,7 @@
   }
 }
 
-/* ✅ Animations personnalisées */
+/*  Custom Animations */
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
@@ -103,7 +103,7 @@
   animation: slideInRight 0.3s ease-out;
 }
 
-/* ✅ États de chargement */
+/*  Loading states */
 .loading {
   @apply animate-pulse bg-gray-200 rounded;
 }

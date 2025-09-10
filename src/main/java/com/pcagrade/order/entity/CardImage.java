@@ -16,7 +16,7 @@ import java.util.UUID;
 
 
 @Data
-@EqualsAndHashCode(callSuper=false)  // ← Ajoutez cette ligne
+@EqualsAndHashCode(callSuper=false) // ← Add this line
 @Entity
 @Table(name = "card_image")
 public class CardImage extends AbstractUlidEntity {

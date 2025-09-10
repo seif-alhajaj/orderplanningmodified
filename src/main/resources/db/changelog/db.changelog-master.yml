@@ -27,7 +27,7 @@ databaseChangeLog:
                 id VARCHAR(36) PRIMARY KEY,
                 num_commande VARCHAR(50) UNIQUE NOT NULL,
                 nombre_cartes INT DEFAULT 0,
-                priorite VARCHAR(20) DEFAULT 'MEDIUM',
+                priority VARCHAR(20) DEFAULT 'FAST',
                 statut INT DEFAULT 1,
                 created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
               );

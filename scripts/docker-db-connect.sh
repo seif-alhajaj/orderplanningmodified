@@ -1,7 +1,7 @@
 # ========== SCRIPT 5: docker-db-connect.sh ==========
 #!/bin/bash
-echo "💾 CONNEXION BASE DE DONNÉES"
+echo " DATABASE CONNECTION"
 echo "============================"
 
-# Se connecter à MySQL dans le container
+# Connect to MySQL in the container
 docker-compose exec database mysql -u ia -pfoufafou dev

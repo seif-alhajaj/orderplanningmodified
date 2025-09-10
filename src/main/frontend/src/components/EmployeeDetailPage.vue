@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50 p-6">
     <div class="max-w-7xl mx-auto">
 
-      <!-- Breadcrumb et retour -->
+      <!-- Breadcrumb and back -->
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center space-x-4">
           <button
@@ -23,7 +23,7 @@
             :disabled="loading"
             class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
-            {{ loading ? '⏳' : '🔄' }} Refresh
+            {{ loading ? '' : '' }} Refresh
           </button>
         </div>
       </div>
@@ -45,10 +45,13 @@
                   'px-3 py-1 rounded-full text-sm font-medium',
                   employeeData?.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                 ]">
-                  {{ employeeData?.active ? '✅ Active' : '❌ Inactive' }}
+                  {{ employeeData?.active ? ' Active' : ' Inactive' }}
                 </span>
                 <span class="text-sm text-gray-600">
                   {{ employeeData?.workHoursPerDay || 8 }}h/day
+                </span>
+                <span class="text-sm text-gray-600">
+                  Role: {{ formatRole(employeeData?.role) }}
                 </span>
               </div>
             </div>
@@ -101,10 +104,10 @@
         </div>
       </div>
 
-      <!-- Liste des commandes -->
+      <!-- Orders List -->
       <div class="space-y-4">
         <h3 class="text-xl font-bold text-gray-900 flex items-center">
-          📋 Assigned Orders
+           Assigned Orders
           <span class="ml-2 text-sm font-normal bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
             {{ orders.length }} orders
           </span>
@@ -129,19 +132,19 @@
             :key="order.id"
             class="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow"
           >
-            <!-- En-tête de commande -->
+            <!-- Order header -->
             <div class="p-6 border-b">
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
                   <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <span class="text-blue-600 font-bold">📦</span>
+                    <span class="text-blue-600 font-bold"></span>
                   </div>
                   <div class="ml-4">
                     <h4 class="text-lg font-semibold text-gray-900">{{ order.orderNumber }}</h4>
                     <p class="text-sm text-gray-600">
                       {{ order.cardCount || 0 }} cards •
                       {{ formatDuration(order.estimatedDuration) }} •
-                      Priority: {{ order.priority || 'Medium' }}
+                      Priority: {{ order.priority || 'fast' }}
                     </p>
                   </div>
                 </div>
@@ -151,7 +154,7 @@
                     'px-3 py-1 rounded-full text-sm font-medium',
                     getPriorityClass(order.priority)
                   ]">
-                    {{ order.priority || 'Medium' }}
+                    {{ order.priority || 'fast' }}
                   </span>
                   <span :class="[
                     'px-3 py-1 rounded-full text-sm font-medium',
@@ -163,12 +166,12 @@
                     @click="toggleOrderCards(order.orderId)"
                     class="bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 text-sm font-medium"
                   >
-                    {{ order.showCards ? '📁 Hide' : '🃏 Show' }} Cards
+                    {{ order.showCards ? ' Hide' : ' Show' }} Cards
                   </button>
                 </div>
               </div>
 
-              <!-- Barre de progression de la commande -->
+                <!-- Order progress bar -->
               <div class="mt-4">
                 <div class="flex justify-between text-sm mb-1">
                   <span class="text-gray-600">Progress</span>
@@ -183,7 +186,7 @@
               </div>
             </div>
 
-            <!-- Liste des cartes (accordéon) -->
+            <!-- List of cards (accordion) -->
             <div v-if="order.showCards" class="border-t bg-gray-50">
               <div class="p-6">
                 <div v-if="order.loadingCards" class="text-center py-4">
@@ -193,7 +196,7 @@
 
                 <div v-else-if="order.cards && order.cards.length > 0">
                   <h5 class="text-sm font-semibold text-gray-700 mb-4">
-                    🃏 Cards in this order ({{ order.cards.length }})
+                     Cards in this order ({{ order.cards.length }})
                   </h5>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                     <div
@@ -213,8 +216,8 @@
                       </div>
 
                       <div class="flex justify-between items-center text-xs text-gray-600">
-                        <span>⏱️ {{ formatDuration(card.duration || 3) }}</span>
-                        <span>💰 {{ (card.amount || 0).toFixed(2) }}€</span>
+                        <span>⏱ {{ formatDuration(card.duration || 3) }}</span>
+                        <span> {{ (card.amount || 0).toFixed(2) }}€</span>
                       </div>
 
                       <div class="mt-2 text-xs text-gray-400 truncate" :title="card.id">
@@ -282,10 +285,10 @@ const refreshData = async () => {
 const loadEmployeeData = async () => {
   loading.value = true
   try {
-    console.log('🔍 Loading employee data for:', props.employeeId)
+    console.log(' Loading employee data for:', props.employeeId)
 
-    // Utiliser l'endpoint qui fonctionne et filtrer côté client
-    const response = await fetch('/api/employees') // ✅ ENDPOINT CORRECT
+    // Use the working endpoint and filter client-side
+    const response = await fetch('/api/employees') //  ENDPOINT CORRECT
 
     if (response.ok) {
       const employees = await response.json()
@@ -297,11 +300,12 @@ const loadEmployeeData = async () => {
           firstName: employee.firstName,
           lastName: employee.lastName,
           email: employee.email,
+          role: employee.role || 'GRADER', // Added role property
           workHoursPerDay: employee.workHoursPerDay || 8,
           active: employee.active,
           status: employee.active ? 'AVAILABLE' : 'OFFLINE'
         }
-        console.log('✅ Employee data loaded:', employeeData.value)
+        console.log(' Employee data loaded:', employeeData.value)
       } else {
         console.error('Employee not found with ID:', props.employeeId)
       }
@@ -318,14 +322,14 @@ const loadEmployeeData = async () => {
 const loadEmployeeOrders = async () => {
   loading.value = true
   try {
-    const planningDate = '2025-06-01' // ou récupérez-la de la configuration
-    console.log('🔍 DEBUG - Loading orders for employee:', props.employeeId)
-    console.log('🔍 DEBUG - Selected date:', props.selectedDate)
+    const planningDate = '2025-06-01' // or get it from the configuration
+    console.log(' DEBUG - Loading orders for employee:', props.employeeId)
+    console.log(' DEBUG - Selected date:', props.selectedDate)
 
     const response = await fetch(`/api/planning/employee/${props.employeeId}?date=${props.selectedDate}`)
     if (response.ok) {
       const data = await response.json()
-      console.log('🔍 DEBUG - Response data:', data)
+      console.log(' DEBUG - Response data:', data)
 
       if (data.success) {
         orders.value = data.orders || []
@@ -346,64 +350,64 @@ const loadEmployeeOrders = async () => {
     loading.value = false
   }
 }
-// Dans EmployeeDetailPage.vue, remplacez la méthode toggleOrderCards :
 
-// Dans EmployeeDetailPage.vue, remplacez la méthode toggleOrderCards :
+// In EmployeeDetailPage.vue, replace the toggleOrderCards method:
 
 const toggleOrderCards = async (orderId) => {
-  console.log('🃏 toggleOrderCards called with:', orderId);
-  console.log('📊 Available orders:', orders.value.map(o => ({ id: o.id, orderId: o.orderId, orderNumber: o.orderNumber })));
+  console.log(' toggleOrderCards called with:', orderId);
+  console.log(' Available orders:', orders.value.map(o => ({ id: o.id, orderId: o.orderId, orderNumber: o.orderNumber })));
 
-  // Essayons de trouver l'ordre avec différentes propriétés
+  // Let's try to find the order using different properties
   let order = orders.value.find(o => o.orderId === orderId);
   if (!order) {
     order = orders.value.find(o => o.id === orderId);
   }
 
   if (!order) {
-    console.error('❌ Order not found with any ID:', orderId);
-    console.error('❌ Available orders structure:', orders.value[0]);
+    console.error(' Order not found with any ID:', orderId);
+    console.error(' Available orders structure:', orders.value[0]);
     return;
   }
 
-  console.log('✅ Order found:', order);
+  console.log(' Order found:', order);
 
   order.showCards = !order.showCards;
-  console.log('🔄 showCards toggled to:', order.showCards);
+  console.log(' showCards toggled to:', order.showCards);
 
   if (order.showCards && (!order.cards || order.cards.length === 0)) {
     order.loadingCards = true;
 
-    // Utilisez l'orderId ou l'id selon ce qui fonctionne
+    // Use orderId or id depending on what works
     const actualOrderId = order.orderId || order.id;
-    console.log('📡 Loading cards for actual order ID:', actualOrderId);
+    console.log(' Loading cards for actual order ID:', actualOrderId);
 
     try {
       const response = await fetch(`http://localhost:8080/api/frontend/employees/order/${actualOrderId}/cards`);
-      console.log('📡 Response status:', response.status);
+      console.log(' Response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Cards data received:', data);
+        console.log(' Cards data received:', data);
 
         order.cards = data.cards || [];
-        console.log('🃏 Cards loaded:', order.cards.length, 'cards');
+        console.log(' Cards loaded:', order.cards.length, 'cards');
 
         if (order.cards.length === 0) {
-          console.warn('⚠️ No cards found for this order');
+          console.warn(' No cards found for this order');
         }
       } else {
-        console.error('❌ Failed to fetch cards:', response.status);
+        console.error('Failed to fetch cards:', response.status);
         const errorText = await response.text();
-        console.error('❌ Error details:', errorText);
+        console.error('Error details:', errorText);
       }
     } catch (error) {
-      console.error('❌ Error loading order cards:', error);
+      console.error('Error loading order cards:', error);
     } finally {
       order.loadingCards = false;
     }
   }
 }
+
 const formatDuration = (minutes: number) => {
   if (minutes < 60) {
     return `${minutes}min`
@@ -443,15 +447,25 @@ const getStatusClass = (status: string) => {
 const getStatusText = (status: string) => {
   switch (status?.toLowerCase()) {
     case 'scheduled':
-      return '📅 Scheduled'
+      return 'Scheduled'
     case 'in_progress':
-      return '⏳ In Progress'
+      return 'In Progress'
     case 'completed':
-      return '✅ Completed'
+      return 'Completed'
     case 'cancelled':
-      return '❌ Cancelled'
+      return 'Cancelled'
     default:
-      return '❓ Unknown'
+      return 'Unknown'
+  }
+}
+
+// Add role formatting function
+const formatRole = (role: string) => {
+  switch(role) {
+    case 'GRADER': return 'Grader';
+    case 'CERTIFIER': return 'Certifier';
+    case 'BOTH': return 'Grader & Certifier';
+    default: return role;
   }
 }
 
